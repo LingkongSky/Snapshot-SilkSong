@@ -111,6 +111,9 @@
       <HintPath>libs\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>libs\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>libs\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
@@ -142,6 +145,7 @@
     <Compile Include="Utils\KeybindingConfig.cs" />
     <Compile Include="Utils\ObjectFinder.cs" />
     <Compile Include="Utils\Serialzation.cs" />
+    <Compile Include="Utils\StateSaver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
