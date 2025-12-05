@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace Snapshot_SilkSong.Utils
 {
-    // 新增键位配置类
     public class KeybindingConfig
     {
         public readonly KeyboardShortcut[] SaveShortcuts;
