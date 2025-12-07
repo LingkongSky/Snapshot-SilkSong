@@ -61,8 +61,8 @@ namespace Snapshot_SilkSong.BattleState
             {
                 GameObject originalObj = obj.targetObject;
                 GameObject clone = GameObject.Instantiate(originalObj);
-                clone.name = originalObj.name;
                 clone.SetActive(false);
+                clone.name = originalObj.name;
                 UnityEngine.Object.DontDestroyOnLoad(clone);
                 BattleInfo newInfo = new BattleInfo(clone, obj.path, originalObj.transform);
                 battleState.BattleSceneList.Add(newInfo);
@@ -91,11 +91,11 @@ namespace Snapshot_SilkSong.BattleState
                 // 恢复父级结构
                 ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path);
 
-                clone.SetActive(true);
-
                 clone.transform.localPosition = savedInfo.savedLocalPosition;
                 clone.transform.localRotation = savedInfo.savedLocalRotation;
                 clone.transform.localScale = savedInfo.savedLocalScale;
+                clone.SetActive(true);
+
 
             }
         }

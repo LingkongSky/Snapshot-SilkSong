@@ -38,13 +38,12 @@ namespace Snapshot_SilkSong.EnemyState
 
             foreach (var obj in FindHealthManagerInDirectChildren())
             {
-                Debug.Log("Saving Enemy: " + obj.path);
+                //Debug.Log("Saving Enemy: " + obj.path);
                 var originalObj = obj.targetObject;
                 var clone = GameObject.Instantiate(originalObj);
-
+                clone.SetActive(false);
                 UnityEngine.Object.DontDestroyOnLoad(clone);
                 clone.name = originalObj.name;
-                clone.SetActive(false);
 
                 var newInfo = new EnemyInfo(clone, obj.path, obj.isActive, originalObj.transform);
                 enemyState.healthManagers.Add(newInfo);
@@ -62,18 +61,18 @@ namespace Snapshot_SilkSong.EnemyState
 
             foreach (var savedInfo in enemyState.healthManagers)
             {
-                Debug.Log("Load Enemy: " + savedInfo.path);
+                //Debug.Log("Load Enemy: " + savedInfo.path);
 
                 var clone = GameObject.Instantiate(savedInfo.targetObject);
-                clone.SetActive(savedInfo.isActive);
                 SceneManager.MoveGameObjectToScene(clone, SceneManager.GetActiveScene());
                 ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path);
                 clone.name = savedInfo.targetObject.name;
+                clone.transform.localPosition = savedInfo.savedLocalPosition;
+                clone.transform.localRotation = savedInfo.savedLocalRotation;
+                clone.transform.localScale = savedInfo.savedLocalScale;
 
-                var transform = clone.transform;
-                transform.localPosition = savedInfo.savedLocalPosition;
-                transform.localRotation = savedInfo.savedLocalRotation;
-                transform.localScale = savedInfo.savedLocalScale;
+                clone.SetActive(savedInfo.isActive);
+
             }
         }
 

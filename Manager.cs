@@ -53,10 +53,11 @@ namespace Snapshot
         public void Save(String path)
         {
             Debug.Log("开始保存快照");
+
+            StateController.IsFsmEnabled = false;
+
             try
             {
-                StateController.IsFsmEnabled = false;
-
                 // 保存玩家状态
                 PlayerState.SavePlayerState(snapshot.playerState, path);
                 // 保存场景状态
@@ -80,7 +81,7 @@ namespace Snapshot
 
         private static IEnumerator EnableFsmAfterDelay()
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
             StateController.IsFsmEnabled = true;
         }
 
@@ -105,9 +106,16 @@ namespace Snapshot
 
 
             // 延迟0.5秒后恢复FSM
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
             StateController.IsFsmEnabled = true;
             loadCoroutine = false;
+
+            // 触发UI更新
+            ToolItemManager.SendEquippedChangedEvent(true);
+            HeroController.instance.AddGeo(0);
+            HeroController.instance.AddShards(0);
+            HeroController.instance.AddSilk(0, false);
+            HeroController.instance.AddHealth(0);
 
             Debug.Log("结束还原快照");
         }

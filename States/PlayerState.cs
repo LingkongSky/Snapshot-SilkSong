@@ -186,13 +186,7 @@ namespace Snapshot_SilkSong.PlayerState
                 playerData.mossBerryValueList = DeepCopier.DeepCopy(playerState.mossBerryValueList);
                 playerData.GrubFarmerMimicValueList = DeepCopier.DeepCopy(playerState.GrubFarmerMimicValueList);
 
-                ToolItemManager.SendEquippedChangedEvent(true);
 
-                // 触发UI更新
-                HeroController.instance.AddGeo(0);
-                HeroController.instance.AddShards(0);
-                HeroController.instance.AddSilk(0, false);
-                HeroController.instance.AddHealth(0);
             }
 
         }

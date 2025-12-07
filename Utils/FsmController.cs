@@ -22,7 +22,7 @@ namespace Snapshot_SilkSong.Utils
             private static bool CommonPrefix(string methodName)
             {
                 bool shouldExecute = StateController.ShouldExecute();
-                Debug.Log($"{StateController.counter++} [Patch] {methodName}  执行状态: {shouldExecute}");
+                //Debug.Log($"{StateController.counter++} [Patch] {methodName}  执行状态: {shouldExecute}");
                 return shouldExecute;
             }
 
@@ -49,7 +49,6 @@ namespace Snapshot_SilkSong.Utils
 
             [HarmonyPatch(typeof(BattleScene), "OnDisable"), HarmonyPrefix]
             static bool Prefix_BattleScene() => Prefix_OtherType("BattleScene", "OnDisable");
-
 
             [HarmonyPatch(typeof(HealthManager), "AddPhysicalPusher"), HarmonyPrefix] // 用于处理怪物尸体
             static bool Prefix_AddPhysicalPusher() => Prefix_OtherType("HealthManager", "AddPhysicalPusher");

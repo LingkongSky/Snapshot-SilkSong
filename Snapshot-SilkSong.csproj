@@ -149,7 +149,6 @@
     <Compile Include="Utils\KeybindingConfig.cs" />
     <Compile Include="Utils\ObjectFinder.cs" />
     <Compile Include="Utils\Serialzation.cs" />
-    <Compile Include="Utils\StateSaver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
