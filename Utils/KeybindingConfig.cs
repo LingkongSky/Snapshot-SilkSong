@@ -1,8 +1,4 @@
-﻿using BepInEx;
-using BepInEx.Configuration;
-using HarmonyLib;
-using Snapshot;
-using System;
+﻿using BepInEx.Configuration;
 using UnityEngine;
 
 namespace Snapshot_SilkSong.Utils

@@ -125,6 +125,9 @@
       <HintPath>libs\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>libs\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
       <HintPath>libs\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
@@ -142,6 +145,7 @@
     <Compile Include="States\EnemyState.cs" />
     <Compile Include="States\PlayerState.cs" />
     <Compile Include="States\SceneState.cs" />
+    <Compile Include="Utils\FsmController.cs" />
     <Compile Include="Utils\KeybindingConfig.cs" />
     <Compile Include="Utils\ObjectFinder.cs" />
     <Compile Include="Utils\Serialzation.cs" />

@@ -30,7 +30,7 @@ namespace Snapshot_SilkSong.BattleState
 
     /*
     BattleScene中
-    切换Gates的Active导致门状态丢失（Battle Gate Mossbone(1)）
+    切换Gates的PlayerMakerFSM的Active导致门状态丢失（Battle Gate Mossbone(1)）
     切换Wave 1的Avtive导致Boss丢失
     */
     public class BattleState 
@@ -86,11 +86,12 @@ namespace Snapshot_SilkSong.BattleState
                 GameObject clone = GameObject.Instantiate(savedInfo.targetObject);
                 clone.name = savedInfo.targetObject.name;
 
-                clone.SetActive(true);
                 SceneManager.MoveGameObjectToScene(clone, SceneManager.GetActiveScene());
 
                 // 恢复父级结构
                 ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path);
+
+                clone.SetActive(true);
 
                 clone.transform.localPosition = savedInfo.savedLocalPosition;
                 clone.transform.localRotation = savedInfo.savedLocalRotation;

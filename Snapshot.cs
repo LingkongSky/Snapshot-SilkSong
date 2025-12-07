@@ -1,8 +1,10 @@
 ﻿using BepInEx;
 using HarmonyLib;
 using Snapshot_SilkSong.Utils;
+using Snapshot_SilkSong.Utils.Snapshot_SilkSong.Patches;
 using System;
-
+using UnityEngine;
+using static SteelSoulQuestSpot;
 
 namespace Snapshot
 {
@@ -17,6 +19,7 @@ namespace Snapshot
         {
             Harmony.CreateAndPatchAll(typeof(Snapshot), null);
             Harmony.CreateAndPatchAll(typeof(Manager), null);
+            Harmony.CreateAndPatchAll(typeof(StatePatches), null);
 
             keybindings = new KeybindingConfig();
         }
@@ -37,6 +40,19 @@ namespace Snapshot
             {
                 LoadSnapshot(loadSlot);
             }
+
+            if (Input.GetKey(KeyCode.Alpha1))
+            {
+                Logger.LogInfo("close");
+                StateController.IsFsmEnabled = false;
+            }
+
+            if (Input.GetKey(KeyCode.Alpha2))
+            {
+                Logger.LogInfo("open");
+                StateController.IsFsmEnabled = true;
+            }
+
         }
 
         private void SaveSnapshot(int slot)

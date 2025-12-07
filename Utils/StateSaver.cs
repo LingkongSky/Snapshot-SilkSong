@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using HutongGames.PlayMaker; // 必须引用 PlayMaker
+using HutongGames.PlayMaker;
 
 namespace Snapshot_SilkSong.Utils
 {
@@ -21,18 +21,6 @@ namespace Snapshot_SilkSong.Utils
         public object value; // 注意：JsonUtility 无法序列化 object，如果需要存盘到文件，需要自行编写序列化逻辑。内存中保存没问题。
     }
 
-    // --- Animator 状态数据结构 ---
-    [System.Serializable]
-    public class AnimatorSnapshot
-    {
-        // Animator 状态
-        public List<LayerSnapshot> layers = new List<LayerSnapshot>();
-        public List<ParamSnapshot> parameters = new List<ParamSnapshot>();
-
-        // Legacy Animation 状态 (兼容旧系统)
-        public string legacyClipName;
-        public float legacyNormalizedTime;
-    }
 
     [System.Serializable]
     public class LayerSnapshot
@@ -117,101 +105,6 @@ namespace Snapshot_SilkSong.Utils
             }
         }
 
-        // === Animation 处理 ===
-        public static AnimatorSnapshot SaveAnimState(GameObject target)
-        {
-            AnimatorSnapshot snap = new AnimatorSnapshot();
-
-            // 1. 处理 Animator (Mecanim)
-            Animator animator = target.GetComponent<Animator>();
-            if (animator != null && animator.runtimeAnimatorController != null)
-            {
-                // 保存 Layers
-                for (int i = 0; i < animator.layerCount; i++)
-                {
-                    var stateInfo = animator.GetCurrentAnimatorStateInfo(i);
-                    snap.layers.Add(new LayerSnapshot
-                    {
-                        layerIndex = i,
-                        stateHash = stateInfo.shortNameHash,
-                        normalizedTime = stateInfo.normalizedTime,
-                        weight = animator.GetLayerWeight(i)
-                    });
-                }
-
-                // 保存 Parameters
-                foreach (var param in animator.parameters)
-                {
-                    object val = null;
-                    if (param.type == AnimatorControllerParameterType.Float) val = animator.GetFloat(param.nameHash);
-                    else if (param.type == AnimatorControllerParameterType.Int) val = animator.GetInteger(param.nameHash);
-                    else if (param.type == AnimatorControllerParameterType.Bool) val = animator.GetBool(param.nameHash);
-
-                    if (val != null) // Trigger 通常不保存，或者视为 Bool
-                    {
-                        snap.parameters.Add(new ParamSnapshot { name = param.name, type = param.type, value = val });
-                    }
-                }
-            }
-
-            // 2. 处理 Legacy Animation (如果有)
-            Animation legacyAnim = target.GetComponent<Animation>();
-            if (legacyAnim != null && legacyAnim.isPlaying)
-            {
-                foreach (AnimationState state in legacyAnim)
-                {
-                    if (legacyAnim.IsPlaying(state.name))
-                    {
-                        snap.legacyClipName = state.name;
-                        snap.legacyNormalizedTime = state.normalizedTime;
-                        break; // 只保存主要播放的一个
-                    }
-                }
-            }
-
-            return snap;
         }
-
-        public static void RestoreAnimState(GameObject target, AnimatorSnapshot snap)
-        {
-            if (snap == null) return;
-
-            // 1. 恢复 Animator
-            Animator animator = target.GetComponent<Animator>();
-            if (animator != null && snap.layers.Count > 0)
-            {
-                // 恢复参数 (必须先做，否则状态切换可能被参数重置)
-                foreach (var param in snap.parameters)
-                {
-                    if (param.type == AnimatorControllerParameterType.Float) animator.SetFloat(param.name, (float)param.value);
-                    else if (param.type == AnimatorControllerParameterType.Int) animator.SetInteger(param.name, (int)param.value);
-                    else if (param.type == AnimatorControllerParameterType.Bool) animator.SetBool(param.name, (bool)param.value);
-                }
-
-                // 恢复状态和时间
-                foreach (var layer in snap.layers)
-                {
-                    if (layer.layerIndex < animator.layerCount)
-                    {
-                        animator.Play(layer.stateHash, layer.layerIndex, layer.normalizedTime);
-                        animator.SetLayerWeight(layer.layerIndex, layer.weight);
-                    }
-                }
-
-                animator.Update(0f); // 强制刷新一帧以应用状态
-            }
-
-            // 2. 恢复 Legacy Animation
-            Animation legacyAnim = target.GetComponent<Animation>();
-            if (legacyAnim != null && !string.IsNullOrEmpty(snap.legacyClipName))
-            {
-                legacyAnim.Play(snap.legacyClipName);
-                AnimationState state = legacyAnim[snap.legacyClipName];
-                if (state != null)
-                {
-                    state.normalizedTime = snap.legacyNormalizedTime;
-                }
-            }
-        }
-    }
+    
 }
