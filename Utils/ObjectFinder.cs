@@ -1,10 +1,59 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-
 namespace Snapshot_SilkSong.Utils
 {
     public class ObjectFinder
     {
+
+        // 检测游戏对象是否存在，不存在则创建
+        public static void EnsureDontDestroyOnLoadObject(string path, string name)
+        {
+            string fullPath = string.IsNullOrEmpty(path) ? name : $"{path}/{name}";
+
+            if (GameObject.Find(fullPath) != null)
+                return;
+
+            GameObject parent = string.IsNullOrEmpty(path) ? null : EnsureParentPath(path);
+            GameObject obj = new GameObject(name);
+
+            UnityEngine.Object.DontDestroyOnLoad(obj);
+
+            if (parent != null)
+                obj.transform.SetParent(parent.transform);
+        }
+
+        private static GameObject EnsureParentPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return null;
+
+            string currentPath = "";
+            Transform parent = null;
+
+            foreach (string part in path.Split('/'))
+            {
+                if (string.IsNullOrEmpty(part))
+                    continue;
+
+                currentPath += (currentPath.Length > 0 ? "/" : "") + part;
+                GameObject obj = GameObject.Find(currentPath);
+
+                if (obj == null)
+                {
+                    obj = new GameObject(part);
+                    UnityEngine.Object.DontDestroyOnLoad(obj);
+
+                    if (parent != null)
+                        obj.transform.SetParent(parent);
+                }
+
+                parent = obj.transform;
+            }
+
+            return parent?.gameObject;
+        }
+
+
 
         // 获取游戏对象的完整路径
         public static string GetGameObjectPath(GameObject obj)

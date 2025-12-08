@@ -26,13 +26,6 @@ namespace Snapshot_SilkSong.Utils
                 return shouldExecute;
             }
 
-            // 为PlayMakerFSM方法创建通用补丁方法
-            private static bool Prefix_PlayMakerFSM(string __originalMethodName)
-            {
-                string methodName = $"PlayMakerFSM.{__originalMethodName}";
-                return CommonPrefix(methodName);
-            }
-
             // 为其他类型的方法创建通用补丁方法
             private static bool Prefix_OtherType(string typeName, string methodName)
             {
@@ -41,17 +34,44 @@ namespace Snapshot_SilkSong.Utils
             }
 
 
-            [HarmonyPatch(typeof(PlayMakerFSM), "OnDisable"), HarmonyPrefix]
-            static bool Prefix_ReEnterState() => Prefix_PlayMakerFSM("OnDisable");
+            [HarmonyPatch(typeof(PlayMakerFSM), "OnDisable"), HarmonyPrefix] // 避免Disable时直接杀死实体
+            static bool Prefix_PlayMakerFSM_OnDisable() => Prefix_OtherType("PlayMakerFSM", "OnDisable");
 
-            [HarmonyPatch(typeof(PlayMakerFSM), "OnEnable"), HarmonyPrefix]
-            static bool Prefix_SwitchState() => Prefix_PlayMakerFSM("OnEnable");
+            [HarmonyPatch(typeof(PlayMakerFSM), "OnEnable"), HarmonyPrefix] // 避免Enable时实体重置状态
+            static bool Prefix_PlayMakerFSM_OnEnable() => Prefix_OtherType("PlayMakerFSM", "OnEnable");
 
+
+            /*
+            [HarmonyPatch(typeof(PlayMakerFSM), "Init"), HarmonyPrefix]  //  避免FSM状态重置  
+            static bool Prefix_PlayMakerFSM_Init() => Prefix_OtherType("PlayMakerFSM", "Init");
+            */
+
+            /*
+            [HarmonyPatch(typeof(PlayMakerFSM), "Start"), HarmonyPrefix] // New
+            static bool Prefix_PlayMakerFSM_Awake() => Prefix_OtherType("PlayMakerFSM", "Start");
+            
             [HarmonyPatch(typeof(BattleScene), "OnDisable"), HarmonyPrefix]
-            static bool Prefix_BattleScene() => Prefix_OtherType("BattleScene", "OnDisable");
+            static bool Prefix_BattleScene_OnDisable() => Prefix_OtherType("BattleScene", "OnDisable");
+            */
 
-            [HarmonyPatch(typeof(HealthManager), "AddPhysicalPusher"), HarmonyPrefix] // 用于处理怪物尸体
-            static bool Prefix_AddPhysicalPusher() => Prefix_OtherType("HealthManager", "AddPhysicalPusher");
+            // 停止大部分基于MonoBehaviour类的OnDisable -> 用于解决SetActive(false)导致的实体自我销毁? 
+            // 解决生成的怪物消失的问题
+
+
+
+            [HarmonyPatch(typeof(HealthManager), "Awake"), HarmonyPrefix] // 避免TagDamager重复生成     
+            static bool Prefix_PlayMakerFSM_Awake(HealthManager __instance) {
+                TagDamageTaker tagDamageTaker = __instance.GetComponent<TagDamageTaker>();
+                UnityEngine.Object.Destroy(tagDamageTaker);
+                return true;
+            }
+
+            [HarmonyPatch(typeof(HealthManager), "HealToMax"), HarmonyPrefix]  //  防止实例化触发Awake时怪物血量回满        
+            static bool PrefixHealthManager_HealToMax() => Prefix_OtherType("HealthManager", "HealToMax");
+
+            [HarmonyPatch(typeof(HealthManager), "AddPhysicalPusher"), HarmonyPrefix] // 用于防止怪物尸体重复生成
+            static bool Prefix_HealthManager_AddPhysicalPusher() => Prefix_OtherType("HealthManager", "AddPhysicalPusher");
+            
         }
     }
 }

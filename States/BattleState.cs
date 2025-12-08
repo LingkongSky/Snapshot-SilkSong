@@ -27,11 +27,8 @@ namespace Snapshot_SilkSong.BattleState
             this.savedLocalScale = originalTransform.localScale;
         }
     }
-
     /*
-    BattleScene中
-    切换Gates的PlayerMakerFSM的Active导致门状态丢失（Battle Gate Mossbone(1)）
-    切换Wave 1的Avtive导致Boss丢失
+    路径：DontDestroyOnLoad/1/BattleState/
     */
     public class BattleState 
     {
@@ -46,13 +43,15 @@ namespace Snapshot_SilkSong.BattleState
         // 保存战斗场景状态
         public static void SaveBattleState(BattleState battleState, String path)
         {
+            ObjectFinder.EnsureDontDestroyOnLoadObject(path, "BattleStates");
+
             // 清理旧数据
             foreach (BattleInfo battleScene in battleState.BattleSceneList)
             {
                 GameObject.Destroy(battleScene.targetObject);
             }
-            battleState.BattleSceneList.Clear();
 
+            battleState.BattleSceneList.Clear();
 
             // 获取当前场景需要保存的对象
             List<BattleInfo> tempBattleScenes = FindBattleScene();

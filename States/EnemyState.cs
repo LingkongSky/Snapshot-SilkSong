@@ -1,4 +1,5 @@
-﻿using Snapshot_SilkSong.Utils;
+﻿using Snapshot_SilkSong.BattleState;
+using Snapshot_SilkSong.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -33,6 +34,8 @@ namespace Snapshot_SilkSong.EnemyState
         // 保存实体状态
         public static void SaveEnemyState(EnemyState enemyState, string path)
         {
+            ObjectFinder.EnsureDontDestroyOnLoadObject(path, "EnemyState");
+
             enemyState.healthManagers.ForEach(info => GameObject.Destroy(info.targetObject));
             enemyState.healthManagers.Clear();
 

@@ -10,10 +10,10 @@ namespace Snapshot_SilkSong.Utils
 
         public KeybindingConfig()
         {
-            SaveShortcuts = new KeyboardShortcut[8];
-            LoadShortcuts = new KeyboardShortcut[8];
+            SaveShortcuts = new KeyboardShortcut[9];
+            LoadShortcuts = new KeyboardShortcut[9];
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 9; i++)
             {
                 SaveShortcuts[i] = new KeyboardShortcut(KeyCode.F1 + i);
                 LoadShortcuts[i] = new KeyboardShortcut(KeyCode.F1 + i,

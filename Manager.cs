@@ -32,42 +32,50 @@ namespace Snapshot
 
     public class Manager
     {
-        // 加载协程引用
-        private static bool loadCoroutine;
-        private static MemorySnapshot snapshot;
-
+        // 协程控制标志 - 改为实例字段
+        private bool loadCoroutineRunning = false;
+        private MemorySnapshot[] snapshot;
 
         public Manager()
         {
-            snapshot = new MemorySnapshot();
+            // 正确初始化数组
+            snapshot = new MemorySnapshot[9];
+
+            // 初始化数组中的每个元素
+            for (int i = 0; i < snapshot.Length; i++)
+            {
+                snapshot[i] = new MemorySnapshot();
+            }
 
             // 创建存档文件夹
             var saveDir = Directory.CreateDirectory("snapshot_save");
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 9; i++)
             {
                 Directory.CreateDirectory(Path.Combine(saveDir.FullName, i.ToString()));
             }
         }
 
-
-        public void Save(String path)
+        public void Save(string path)
         {
             Debug.Log("开始保存快照");
-
             StateController.IsFsmEnabled = false;
+            ObjectFinder.EnsureDontDestroyOnLoadObject("", path);
+            Debug.Log(path);
 
             try
             {
-                // 保存玩家状态
-                PlayerState.SavePlayerState(snapshot.playerState, path);
-                // 保存场景状态
-                SceneState.SaveSceneState(snapshot.sceneState, path);
-                // 保存战斗场景状态
-                BattleState.SaveBattleState(snapshot.battleState, path);
-                // 保存敌人状态
-                EnemyState.SaveEnemyState(snapshot.enemyState, path);
+                int index = int.Parse(path);
 
-                snapshot.isActive = true;
+                // 保存玩家状态
+                PlayerState.SavePlayerState(snapshot[index].playerState, path);
+                // 保存场景状态
+                SceneState.SaveSceneState(snapshot[index].sceneState, path);
+                // 保存战斗场景状态
+                BattleState.SaveBattleState(snapshot[index].battleState, path);
+                // 保存敌人状态
+                EnemyState.SaveEnemyState(snapshot[index].enemyState, path);
+
+                snapshot[index].isActive = true;
             }
             catch (Exception e)
             {
@@ -78,37 +86,43 @@ namespace Snapshot
             Debug.Log("结束保存快照");
         }
 
-
-        private static IEnumerator EnableFsmAfterDelay()
+        private IEnumerator EnableFsmAfterDelay()
         {
             yield return new WaitForSeconds(0.5f);
             StateController.IsFsmEnabled = true;
         }
 
-        public void Load(String path)
+        public void Load(string path)
         {
-            if (!loadCoroutine && snapshot.isActive)
+            int index = int.Parse(path);
+
+            if (!loadCoroutineRunning && snapshot[index].isActive)
             {
                 GameManager.instance.StartCoroutine(LoadCoroutine(path));
             }
         }
 
-        private static IEnumerator LoadCoroutine(String path)
+        private IEnumerator LoadCoroutine(string path)
         {
+            loadCoroutineRunning = true;
+
             Debug.Log("开始还原快照");
             StateController.IsFsmEnabled = false;
 
-            yield return SceneState.LoadSceneStateCoroutine(snapshot.sceneState, path);
+            int index = int.Parse(path);
 
-            PlayerState.LoadPlayerState(snapshot.playerState, path);
-            BattleState.LoadBattleState(snapshot.battleState, path);
-            EnemyState.LoadEnemyState(snapshot.enemyState, path);
+            yield return SceneState.LoadSceneStateCoroutine(snapshot[index].sceneState, path);
 
+            PlayerState.LoadPlayerState(snapshot[index].playerState, path);
+            BattleState.LoadBattleState(snapshot[index].battleState, path);
+            EnemyState.LoadEnemyState(snapshot[index].enemyState, path);
 
             // 延迟0.5秒后恢复FSM
             yield return new WaitForSeconds(0.5f);
             StateController.IsFsmEnabled = true;
-            loadCoroutine = false;
+
+            // 重置协程标志
+            loadCoroutineRunning = false;
 
             // 触发UI更新
             ToolItemManager.SendEquippedChangedEvent(true);

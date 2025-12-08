@@ -148,7 +148,6 @@
     <Compile Include="Utils\FsmController.cs" />
     <Compile Include="Utils\KeybindingConfig.cs" />
     <Compile Include="Utils\ObjectFinder.cs" />
-    <Compile Include="Utils\Serialzation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
