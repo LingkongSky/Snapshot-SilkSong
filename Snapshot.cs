@@ -40,7 +40,7 @@ namespace Snapshot
             {
                 LoadSnapshot(loadSlot);
             }
-            /*
+            
             if (Input.GetKey(KeyCode.Alpha1))
             {
                 Logger.LogInfo("close");
@@ -52,7 +52,7 @@ namespace Snapshot
                 Logger.LogInfo("open");
                 StateController.IsFsmEnabled = true;
             }
-            */
+            
         }
 
         private void SaveSnapshot(int slot)

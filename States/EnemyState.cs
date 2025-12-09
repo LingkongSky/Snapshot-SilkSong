@@ -95,7 +95,9 @@ namespace Snapshot_SilkSong.EnemyState
                 if (parent != null)
                 {
                     var battleWave = parent.GetComponent<BattleWave>();
-                    if (battleWave != null)
+                    var battleScene = parent.GetComponent<BattleScene>();
+
+                    if (battleWave != null || battleScene != null)
                     {
                         continue;
                     }
