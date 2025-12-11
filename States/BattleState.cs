@@ -59,13 +59,15 @@ namespace Snapshot_SilkSong.BattleState
             foreach (BattleInfo obj in tempBattleScenes)
             {
                 GameObject originalObj = obj.targetObject;
-                GameObject clone = GameObject.Instantiate(originalObj);
+                GameObject clone = GameObject.Instantiate(originalObj, GameObject.Find(path+ "BattleStates/").transform);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
-                UnityEngine.Object.DontDestroyOnLoad(clone);
                 BattleInfo newInfo = new BattleInfo(clone, obj.path, originalObj.transform);
                 battleState.BattleSceneList.Add(newInfo);
             }
+
+            UnityEngine.Object.DontDestroyOnLoad(GameObject.Find(path).transform);
+
         }
 
         // 恢复战斗场景状态

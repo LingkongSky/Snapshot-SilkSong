@@ -43,14 +43,16 @@ namespace Snapshot_SilkSong.EnemyState
             {
                 //Debug.Log("Saving Enemy: " + obj.path);
                 var originalObj = obj.targetObject;
-                var clone = GameObject.Instantiate(originalObj);
+                var clone = GameObject.Instantiate(originalObj, GameObject.Find(path+ "/EnemyState").transform);
                 clone.SetActive(false);
-                UnityEngine.Object.DontDestroyOnLoad(clone);
                 clone.name = originalObj.name;
 
                 var newInfo = new EnemyInfo(clone, obj.path, obj.isActive, originalObj.transform);
                 enemyState.healthManagers.Add(newInfo);
             }
+
+            UnityEngine.Object.DontDestroyOnLoad(GameObject.Find(path).transform);
+
         }
 
         // 恢复实体状态
