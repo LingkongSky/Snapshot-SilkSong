@@ -8,12 +8,14 @@ namespace Snapshot_SilkSong.Utils
         public readonly KeyboardShortcut[] SaveShortcuts;
         public readonly KeyboardShortcut[] LoadShortcuts;
 
+        private const int SlotCount = 12;
+
         public KeybindingConfig()
         {
-            SaveShortcuts = new KeyboardShortcut[9];
-            LoadShortcuts = new KeyboardShortcut[9];
+            SaveShortcuts = new KeyboardShortcut[SlotCount];
+            LoadShortcuts = new KeyboardShortcut[SlotCount];
 
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < SlotCount; i++)
             {
                 SaveShortcuts[i] = new KeyboardShortcut(KeyCode.F1 + i);
                 LoadShortcuts[i] = new KeyboardShortcut(KeyCode.F1 + i,
@@ -37,7 +39,7 @@ namespace Snapshot_SilkSong.Utils
             {
                 if (shortcuts[i].IsDown())
                 {
-                    slot = i + 1;
+                    slot = i + 1; // 槽位从1开始编号
                     return true;
                 }
             }

@@ -3,51 +3,53 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Snapshot_SilkSong.EnemyState
+namespace Snapshot_SilkSong.States
 {
-    [System.Serializable]
-    public class EnemyInfo
-    {
-        public GameObject targetObject;
-        public string path;
-        public bool isActive;
-        public Vector3 savedLocalPosition;
-        public Quaternion savedLocalRotation;
-        public Vector3 savedLocalScale;
-
-        public EnemyInfo(GameObject gameObject, string path, bool isActive, Transform originalTransform)
+   
+        [System.Serializable]
+        public class PersistentInfo
         {
-            this.targetObject = gameObject;
-            this.path = path;
-            this.isActive = isActive;
-            this.savedLocalPosition = originalTransform.localPosition;
-            this.savedLocalRotation = originalTransform.localRotation;
-            this.savedLocalScale = originalTransform.localScale;
-        }
-    }
+            public GameObject targetObject;
+            public string path;
+            public bool isActive;
+            public Vector3 savedLocalPosition;
+            public Quaternion savedLocalRotation;
+            public Vector3 savedLocalScale;
 
-    public class EnemyState
+            public PersistentInfo(GameObject gameObject, string path, bool isActive, Transform originalTransform)
+            {
+                this.targetObject = gameObject;
+                this.path = path;
+                this.isActive = isActive;
+                this.savedLocalPosition = originalTransform.localPosition;
+                this.savedLocalRotation = originalTransform.localRotation;
+                this.savedLocalScale = originalTransform.localScale;
+            }
+        }
+
+
+    public class PersistentState
     {
-        public List<EnemyInfo> healthManagers = new List<EnemyInfo>();
+        public List<PersistentInfo> healthManagers = new List<PersistentInfo>();
 
         // 保存实体状态
-        public static void SaveEnemyState(EnemyState enemyState, string path)
+        public static void SavePersistentState(PersistentState persistentState, string path)
         {
-            ObjectFinder.EnsureDontDestroyOnLoadObject(path, "EnemyState");
+            ObjectFinder.EnsureDontDestroyOnLoadObject(path, "PersistentState");
 
-            enemyState.healthManagers.ForEach(info => GameObject.Destroy(info.targetObject));
-            enemyState.healthManagers.Clear();
+            persistentState.healthManagers.ForEach(info => GameObject.Destroy(info.targetObject));
+            persistentState.healthManagers.Clear();
 
-            foreach (var obj in FindHealthManagerInDirectChildren())
+            foreach (var obj in FindPersistentBoolItemInDirectChildren())
             {
-                //Debug.Log("Saving Enemy: " + obj.path);
+                //Debug.Log("Saving Persistent: " + obj.path);
                 var originalObj = obj.targetObject;
-                var clone = GameObject.Instantiate(originalObj, GameObject.Find(path+ "/EnemyState").transform);
+                var clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "/PersistentState").transform);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
 
-                var newInfo = new EnemyInfo(clone, obj.path, obj.isActive, originalObj.transform);
-                enemyState.healthManagers.Add(newInfo);
+                var newInfo = new PersistentInfo(clone, obj.path, obj.isActive, originalObj.transform);
+                persistentState.healthManagers.Add(newInfo);
             }
 
             UnityEngine.Object.DontDestroyOnLoad(GameObject.Find(path).transform);
@@ -55,17 +57,17 @@ namespace Snapshot_SilkSong.EnemyState
         }
 
         // 恢复实体状态
-        public static void LoadEnemyState(EnemyState enemyState, string path)
+        public static void LoadPersistentState(PersistentState persistentState, string path)
         {
-            FindHealthManagerInDirectChildren().ForEach(obj =>
+            FindPersistentBoolItemInDirectChildren().ForEach(obj =>
             {
                 if (obj.targetObject != null)
                     GameObject.Destroy(obj.targetObject);
             });
 
-            foreach (var savedInfo in enemyState.healthManagers)
+            foreach (var savedInfo in persistentState.healthManagers)
             {
-                //Debug.Log("Load Enemy: " + savedInfo.path);
+                //Debug.Log("Load Persistent: " + savedInfo.path);
 
                 var clone = GameObject.Instantiate(savedInfo.targetObject);
                 SceneManager.MoveGameObjectToScene(clone, SceneManager.GetActiveScene());
@@ -81,24 +83,24 @@ namespace Snapshot_SilkSong.EnemyState
         }
 
         // 获取当前场景中的所有游戏实体对象
-        public static List<EnemyInfo> FindHealthManagerInDirectChildren()
+        public static List<PersistentInfo> FindPersistentBoolItemInDirectChildren()
         {
-            var result = new List<EnemyInfo>();
+            var result = new List<PersistentInfo>();
             var currentScene = SceneManager.GetActiveScene();
 
-            foreach (var obj in GameObject.FindObjectsByType<HealthManager>(
+            foreach (var obj in GameObject.FindObjectsByType<PersistentBoolItem>(
                 FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 if (obj == null || obj.gameObject.scene != currentScene) continue;
 
-                // 检查父对象是否有 BattleWave 组件
                 Transform parent = obj.transform.parent;
                 if (parent != null)
                 {
-                    var battleWave = parent.GetComponent<BattleWave>();
+                    var battleWave = parent.GetComponent<HealthManager>();
                     var battleScene = parent.GetComponent<BattleScene>();
+                    var liftPlatform = obj.GetComponent<LiftPlatform>();
 
-                    if (battleWave != null || battleScene != null)
+                    if (battleWave != null || battleScene != null || liftPlatform != null)
                     {
                         continue;
                     }
@@ -117,7 +119,7 @@ namespace Snapshot_SilkSong.EnemyState
                 if (!hasHeroController)
                 {
                     var gameObject = obj.gameObject;
-                    result.Add(new EnemyInfo(
+                    result.Add(new PersistentInfo(
                         gameObject,
                         ObjectFinder.GetGameObjectPath(gameObject),
                         gameObject.activeSelf,
@@ -129,4 +131,7 @@ namespace Snapshot_SilkSong.EnemyState
             return result;
         }
     }
+
+
+
 }

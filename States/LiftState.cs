@@ -1,12 +1,14 @@
 ﻿using Snapshot_SilkSong.Utils;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Snapshot_SilkSong.EnemyState
+namespace Snapshot_SilkSong.States
 {
+
     [System.Serializable]
-    public class EnemyInfo
+    public class LiftInfo
     {
         public GameObject targetObject;
         public string path;
@@ -15,7 +17,7 @@ namespace Snapshot_SilkSong.EnemyState
         public Quaternion savedLocalRotation;
         public Vector3 savedLocalScale;
 
-        public EnemyInfo(GameObject gameObject, string path, bool isActive, Transform originalTransform)
+        public LiftInfo(GameObject gameObject, string path, bool isActive, Transform originalTransform)
         {
             this.targetObject = gameObject;
             this.path = path;
@@ -26,28 +28,28 @@ namespace Snapshot_SilkSong.EnemyState
         }
     }
 
-    public class EnemyState
+    public class LiftState
     {
-        public List<EnemyInfo> healthManagers = new List<EnemyInfo>();
+        public List<LiftInfo> healthManagers = new List<LiftInfo>();
 
         // 保存实体状态
-        public static void SaveEnemyState(EnemyState enemyState, string path)
+        public static void SaveLiftState(LiftState liftState, string path)
         {
-            ObjectFinder.EnsureDontDestroyOnLoadObject(path, "EnemyState");
+            ObjectFinder.EnsureDontDestroyOnLoadObject(path, "LiftState");
 
-            enemyState.healthManagers.ForEach(info => GameObject.Destroy(info.targetObject));
-            enemyState.healthManagers.Clear();
+            liftState.healthManagers.ForEach(info => GameObject.Destroy(info.targetObject));
+            liftState.healthManagers.Clear();
 
-            foreach (var obj in FindHealthManagerInDirectChildren())
+            foreach (var obj in FindLiftPlatformInDirectChildren())
             {
-                //Debug.Log("Saving Enemy: " + obj.path);
+                //Debug.Log("Saving Lift: " + obj.path);
                 var originalObj = obj.targetObject;
-                var clone = GameObject.Instantiate(originalObj, GameObject.Find(path+ "/EnemyState").transform);
+                var clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "/LiftState").transform);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
 
-                var newInfo = new EnemyInfo(clone, obj.path, obj.isActive, originalObj.transform);
-                enemyState.healthManagers.Add(newInfo);
+                var newInfo = new LiftInfo(clone, obj.path, obj.isActive, originalObj.transform);
+                liftState.healthManagers.Add(newInfo);
             }
 
             UnityEngine.Object.DontDestroyOnLoad(GameObject.Find(path).transform);
@@ -55,18 +57,17 @@ namespace Snapshot_SilkSong.EnemyState
         }
 
         // 恢复实体状态
-        public static void LoadEnemyState(EnemyState enemyState, string path)
+        public static void LoadLiftState(LiftState liftState, string path)
         {
-            FindHealthManagerInDirectChildren().ForEach(obj =>
+            FindLiftPlatformInDirectChildren().ForEach(obj =>
             {
                 if (obj.targetObject != null)
                     GameObject.Destroy(obj.targetObject);
             });
 
-            foreach (var savedInfo in enemyState.healthManagers)
+            foreach (var savedInfo in liftState.healthManagers)
             {
-                //Debug.Log("Load Enemy: " + savedInfo.path);
-
+                //Debug.Log("Load Lift: " + savedInfo.path);
                 var clone = GameObject.Instantiate(savedInfo.targetObject);
                 SceneManager.MoveGameObjectToScene(clone, SceneManager.GetActiveScene());
                 ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path);
@@ -81,18 +82,19 @@ namespace Snapshot_SilkSong.EnemyState
         }
 
         // 获取当前场景中的所有游戏实体对象
-        public static List<EnemyInfo> FindHealthManagerInDirectChildren()
+        public static List<LiftInfo> FindLiftPlatformInDirectChildren()
         {
-            var result = new List<EnemyInfo>();
+            var result = new List<LiftInfo>();
             var currentScene = SceneManager.GetActiveScene();
 
-            foreach (var obj in GameObject.FindObjectsByType<HealthManager>(
+            foreach (var obj in GameObject.FindObjectsByType<LiftPlatform>(
                 FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                if (obj == null || obj.gameObject.scene != currentScene) continue;
+                var objParent = obj.gameObject.transform.parent;
+                if (objParent == null || objParent.gameObject.scene != currentScene) continue;
 
                 // 检查父对象是否有 BattleWave 组件
-                Transform parent = obj.transform.parent;
+                Transform parent = objParent.transform.parent;
                 if (parent != null)
                 {
                     var battleWave = parent.GetComponent<BattleWave>();
@@ -104,26 +106,14 @@ namespace Snapshot_SilkSong.EnemyState
                     }
                 }
 
-                bool hasHeroController = false;
-                foreach (Transform child in obj.transform)
-                {
-                    if (child.GetComponent<HeroController>() != null)
-                    {
-                        hasHeroController = true;
-                        break;
-                    }
-                }
-
-                if (!hasHeroController)
-                {
-                    var gameObject = obj.gameObject;
-                    result.Add(new EnemyInfo(
-                        gameObject,
-                        ObjectFinder.GetGameObjectPath(gameObject),
-                        gameObject.activeSelf,
-                        gameObject.transform
-                    ));
-                }
+                var gameObject = objParent.gameObject;
+                result.Add(new LiftInfo(
+                    gameObject,
+                    ObjectFinder.GetGameObjectPath(gameObject),
+                    gameObject.activeSelf,
+                    gameObject.transform
+                ));
+                
             }
 
             return result;

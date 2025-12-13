@@ -60,6 +60,7 @@ namespace Snapshot
             string path = $"{slot}";
             manager.Save(path);
             Logger.LogInfo($"Saved snapshot to slot {slot}");
+            System.Media.SystemSounds.Beep.Play();
         }
 
         private void LoadSnapshot(int slot)
@@ -67,6 +68,8 @@ namespace Snapshot
             string path = $"{slot}";
             manager.Load(path);
             Logger.LogInfo($"Loaded snapshot from slot {slot}");
+            System.Media.SystemSounds.Beep.Play();
+
         }
     }
 }

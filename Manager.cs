@@ -2,6 +2,7 @@
 using Snapshot_SilkSong.EnemyState;
 using Snapshot_SilkSong.PlayerState;
 using Snapshot_SilkSong.SceneState;
+using Snapshot_SilkSong.States;
 using Snapshot_SilkSong.Utils;
 using System;
 using System.Collections;
@@ -16,6 +17,8 @@ namespace Snapshot
         public SceneState sceneState;
         public EnemyState enemyState;
         public BattleState battleState;
+        public PersistentState persistentState;
+        public LiftState liftState;
         public bool isActive;
         public DateTime timestamp;
 
@@ -25,6 +28,8 @@ namespace Snapshot
             sceneState = new SceneState();
             enemyState = new EnemyState();
             battleState = new BattleState();
+            persistentState = new PersistentState();
+            liftState = new LiftState();
             isActive = false;
             timestamp = DateTime.Now;
         }
@@ -38,23 +43,21 @@ namespace Snapshot
 
         public Manager()
         {
-            // 正确初始化数组
-            snapshot = new MemorySnapshot[9];
+            const int SlotCount = 12;
 
-            // 初始化数组中的每个元素
+            snapshot = new MemorySnapshot[SlotCount];
+
             for (int i = 0; i < snapshot.Length; i++)
             {
                 snapshot[i] = new MemorySnapshot();
             }
 
-            // 创建存档文件夹
             var saveDir = Directory.CreateDirectory("snapshot_save");
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < SlotCount; i++)
             {
                 Directory.CreateDirectory(Path.Combine(saveDir.FullName, i.ToString()));
             }
         }
-
         public void Save(string path)
         {
             Debug.Log("开始保存快照");
@@ -74,6 +77,10 @@ namespace Snapshot
                 BattleState.SaveBattleState(snapshot[index].battleState, path);
                 // 保存敌人状态
                 EnemyState.SaveEnemyState(snapshot[index].enemyState, path);
+                // 保存持久化状态
+                PersistentState.SavePersistentState(snapshot[index].persistentState, path);
+                // 保存电梯状态
+                //LiftState.SaveLiftState(snapshot[index].liftState, path);
 
                 snapshot[index].isActive = true;
             }
@@ -116,6 +123,8 @@ namespace Snapshot
             PlayerState.LoadPlayerState(snapshot[index].playerState, path);
             BattleState.LoadBattleState(snapshot[index].battleState, path);
             EnemyState.LoadEnemyState(snapshot[index].enemyState, path);
+            PersistentState.LoadPersistentState(snapshot[index].persistentState, path);
+            //LiftState.LoadLiftState(snapshot[index].liftState, path);
 
             // 延迟0.5秒后恢复FSM
             yield return new WaitForSeconds(0.5f);

@@ -36,9 +36,16 @@ namespace Snapshot_SilkSong.Utils
 
             [HarmonyPatch(typeof(PlayMakerFSM), "OnDisable"), HarmonyPrefix] // 避免Disable时直接杀死实体
             static bool Prefix_PlayMakerFSM_OnDisable() => Prefix_OtherType("PlayMakerFSM", "OnDisable");
-            
+
+            /*
+            [HarmonyPatch(typeof(LiftPlatform), "OnDisable"), HarmonyPrefix] // 处理电梯状态保存
+            static bool Prefix_LiftPlatform_OnDisable() => Prefix_OtherType("LiftPlatform", "OnDisable");
+            */
             [HarmonyPatch(typeof(Fsm), "OnEnable"), HarmonyPrefix] // 避免Enable时实体重置状态
             static bool Prefix_Fsm_OnEnable() => Prefix_OtherType("Fsm", "OnEnable");
+
+
+
             /*
             [HarmonyPatch(typeof(PlayMakerFSM), "Reset"), HarmonyPrefix] // 避免Enable时实体重置状态
             static bool Prefix_PlayMakerFSM_Reset() => Prefix_OtherType("PlayMakerFSM", "Reset");
@@ -56,9 +63,6 @@ namespace Snapshot_SilkSong.Utils
             static bool Prefix_BattleScene_OnDisable() => Prefix_OtherType("BattleScene", "OnDisable");
             */
 
-            // 停止大部分基于MonoBehaviour类的OnDisable -> 用于解决SetActive(false)导致的实体自我销毁? 
-            // 解决Boss无法召唤小怪和落石的问题
-            // 实体引用关系无法继承
 
 
             [HarmonyPatch(typeof(HealthManager), "Awake"), HarmonyPrefix] // 避免TagDamager重复生成     
