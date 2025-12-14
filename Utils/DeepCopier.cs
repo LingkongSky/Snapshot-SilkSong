@@ -9,7 +9,6 @@ public static class DeepCopier
     {
         if (obj == null) return default;
 
-        // 对于基本类型和字符串，直接返回
         if (obj.GetType().IsValueType || obj is string)
             return obj;
 
@@ -25,7 +24,7 @@ public static class DeepCopier
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"深拷贝失败: {ex.Message}", ex);
+            throw new InvalidOperationException($"Deep Copy failed: {ex.Message}", ex);
         }
     }
 }

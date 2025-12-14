@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using HutongGames.PlayMaker;
-using UnityEngine;
 
 namespace Snapshot_SilkSong.Utils
 {
@@ -18,19 +17,14 @@ namespace Snapshot_SilkSong.Utils
         [HarmonyPatch]
         public class StatePatches
         {
-            // 通用的前缀拦截方法
-            private static bool CommonPrefix(string methodName)
-            {
-                bool shouldExecute = StateController.ShouldExecute();
-                //Debug.Log($"{StateController.counter++} [Patch] {methodName}  执行状态: {shouldExecute}");
-                return shouldExecute;
-            }
 
             // 为其他类型的方法创建通用补丁方法
             private static bool Prefix_OtherType(string typeName, string methodName)
             {
                 string fullMethodName = $"{typeName}.{methodName}";
-                return CommonPrefix(fullMethodName);
+                bool shouldExecute = StateController.ShouldExecute();
+                //Debug.Log($"{StateController.counter++} [Patch] {methodName}  执行状态: {shouldExecute}");
+                return shouldExecute;
             }
 
 
@@ -43,8 +37,6 @@ namespace Snapshot_SilkSong.Utils
             */
             [HarmonyPatch(typeof(Fsm), "OnEnable"), HarmonyPrefix] // 避免Enable时实体重置状态
             static bool Prefix_Fsm_OnEnable() => Prefix_OtherType("Fsm", "OnEnable");
-
-
 
             /*
             [HarmonyPatch(typeof(PlayMakerFSM), "Reset"), HarmonyPrefix] // 避免Enable时实体重置状态
@@ -62,8 +54,6 @@ namespace Snapshot_SilkSong.Utils
             [HarmonyPatch(typeof(BattleScene), "OnDisable"), HarmonyPrefix]
             static bool Prefix_BattleScene_OnDisable() => Prefix_OtherType("BattleScene", "OnDisable");
             */
-
-
 
             [HarmonyPatch(typeof(HealthManager), "Awake"), HarmonyPrefix] // 避免TagDamager重复生成     
             static bool Prefix_PlayMakerFSM_Awake(HealthManager __instance) {
