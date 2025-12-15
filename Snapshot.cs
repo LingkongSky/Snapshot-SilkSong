@@ -52,14 +52,16 @@ namespace Snapshot
         {
             manager.Save(slot);
             Logger.LogInfo($"Saved snapshot to slot {slot}");
-            System.Media.SystemSounds.Beep.Play();
+            if(configManager.PlaySoundOnSave)
+                System.Media.SystemSounds.Beep.Play();
         }
 
         private void LoadSnapshot(string slot)
         {
             manager.Load(slot);
             Logger.LogInfo($"Loaded snapshot from slot {slot}");
-            System.Media.SystemSounds.Beep.Play();
+            if (configManager.PlaySoundOnLoad)
+                System.Media.SystemSounds.Beep.Play();
 
         }
     }

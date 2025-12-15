@@ -60,8 +60,6 @@ namespace Snapshot
                     snapshots[slotName] = new MemorySnapshot();
                 }
 
-
-
                 // 保存玩家状态
                 PlayerState.SavePlayerState(snapshots[slotName].playerState, slotName);
                 // 保存场景状态

@@ -12,6 +12,10 @@ namespace Snapshot_SilkSong.Utils
         private static ConfigFile config;
         public Dictionary<string, HotkeySlot> slots = new Dictionary<string, HotkeySlot>();
 
+        // 声音配置
+        public bool PlaySoundOnSave { get; private set; }
+        public bool PlaySoundOnLoad { get; private set; }
+
         public class HotkeySlot
         {
             public string SlotName { get; set; }
@@ -27,8 +31,36 @@ namespace Snapshot_SilkSong.Utils
             LoadConfig();
         }
 
-
         private void LoadConfig()
+        {
+            // 加载声音配置
+            LoadSoundConfig();
+
+            // 加载热键配置
+            LoadHotkeyConfig();
+        }
+
+        private void LoadSoundConfig()
+        {
+            var playSoundOnSaveEntry = config.Bind(
+                "Sound",
+                "PlaySoundOnSave", 
+                true,  
+                "保存时播放音效"  
+            );
+
+            var playSoundOnLoadEntry = config.Bind(
+                "Sound",
+                "PlaySoundOnLoad",
+                true,
+                "加载时播放音效"
+            );
+
+            PlaySoundOnSave = playSoundOnSaveEntry.Value;
+            PlaySoundOnLoad = playSoundOnLoadEntry.Value;
+        }
+
+        private void LoadHotkeyConfig()
         {
             slots.Clear();
 
@@ -50,7 +82,6 @@ namespace Snapshot_SilkSong.Utils
 
                 slots[slotName] = ParseHotkeyConfig(slotName, saveKeyEntry.Value, loadKeyEntry.Value);
             }
-
         }
 
         private HotkeySlot ParseHotkeyConfig(string slotName, string saveKeyStr, string loadKeyStr)
