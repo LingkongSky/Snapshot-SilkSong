@@ -86,10 +86,16 @@ namespace Snapshot_SilkSong.EnemyState
             var result = new List<EnemyInfo>();
             var currentScene = SceneManager.GetActiveScene();
 
-            foreach (var obj in GameObject.FindObjectsByType<HealthManager>(
-                FindObjectsInactive.Include, FindObjectsSortMode.None))
+            var allObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            foreach (var obj in allObjects)
             {
                 if (obj == null || obj.gameObject.scene != currentScene) continue;
+
+                var healthManager = obj.GetComponent<HealthManager>();
+                var activeCorpse = obj.GetComponent<ActiveCorpse>();
+
+                if (healthManager == null && activeCorpse == null) continue;
 
                 // 检查父对象是否有 BattleWave 组件
                 Transform parent = obj.transform.parent;
@@ -127,6 +133,7 @@ namespace Snapshot_SilkSong.EnemyState
             }
 
             return result;
-        }
+        
+}
     }
 }
