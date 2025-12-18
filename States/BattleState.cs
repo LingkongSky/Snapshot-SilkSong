@@ -11,16 +11,18 @@ namespace Snapshot_SilkSong.BattleState
     {
         public GameObject targetObject;
         public string path;
+        public string sceneName; 
 
         public Vector3 savedLocalPosition;
         public Quaternion savedLocalRotation;
         public Vector3 savedLocalScale;
 
-        public BattleInfo(GameObject gameObject, string path, Transform originalTransform)
+        public BattleInfo(GameObject gameObject, string path, string sceneName, Transform originalTransform)
         {
             this.targetObject = gameObject;
             this.path = path;
-
+            this.sceneName = sceneName;
+            
             // 从原始 Transform 中记录局部信息
             this.savedLocalPosition = originalTransform.localPosition;
             this.savedLocalRotation = originalTransform.localRotation;
@@ -30,7 +32,7 @@ namespace Snapshot_SilkSong.BattleState
     /*
     路径：DontDestroyOnLoad/1/BattleState/
     */
-    public class BattleState 
+    public class BattleState
     {
         public List<BattleInfo> BattleSceneList;
 
@@ -59,10 +61,10 @@ namespace Snapshot_SilkSong.BattleState
             foreach (BattleInfo obj in tempBattleScenes)
             {
                 GameObject originalObj = obj.targetObject;
-                GameObject clone = GameObject.Instantiate(originalObj, GameObject.Find(path+ "BattleStates/").transform);
+                GameObject clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "BattleStates/").transform);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
-                BattleInfo newInfo = new BattleInfo(clone, obj.path, originalObj.transform);
+                BattleInfo newInfo = new BattleInfo(clone, obj.path, originalObj.scene.name, originalObj.transform);
                 battleState.BattleSceneList.Add(newInfo);
             }
 
@@ -87,17 +89,13 @@ namespace Snapshot_SilkSong.BattleState
                 GameObject clone = GameObject.Instantiate(savedInfo.targetObject);
                 clone.name = savedInfo.targetObject.name;
 
-                SceneManager.MoveGameObjectToScene(clone, SceneManager.GetActiveScene());
-
                 // 恢复父级结构
-                ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path);
+                ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path, savedInfo.sceneName);
 
                 clone.transform.localPosition = savedInfo.savedLocalPosition;
                 clone.transform.localRotation = savedInfo.savedLocalRotation;
                 clone.transform.localScale = savedInfo.savedLocalScale;
                 clone.SetActive(true);
-
-
             }
         }
 
@@ -105,23 +103,33 @@ namespace Snapshot_SilkSong.BattleState
         {
             List<BattleInfo> battleSceneObjects = new List<BattleInfo>();
 
-            BattleScene[] allComponents = GameObject.FindObjectsByType<BattleScene>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            Scene currentActiveScene = SceneManager.GetActiveScene();
-
-            foreach (BattleScene component in allComponents)
+            // 遍历所有已加载的场景
+            for (int i = 0; i < SceneManager.sceneCount; i++)
             {
-                if (component == null) continue;
+                Scene scene = SceneManager.GetSceneAt(i);
 
-                GameObject obj = component.gameObject;
-
-                if (obj.scene != currentActiveScene)
+                if (scene.name == "DontDestroyOnLoad" ||
+                    scene.name == "HideAndDontSave")
                 {
                     continue;
                 }
 
-                string path = ObjectFinder.GetGameObjectPath(obj);
-                Debug.Log(path);
-                battleSceneObjects.Add(new BattleInfo(obj, path, obj.transform));
+                BattleScene[] allComponents = GameObject.FindObjectsByType<BattleScene>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+                foreach (BattleScene component in allComponents)
+                {
+                    if (component == null) continue;
+
+                    GameObject obj = component.gameObject;
+
+                    if (obj.scene != scene)
+                    {
+                        continue;
+                    }
+
+                    string path = ObjectFinder.GetGameObjectPath(obj);
+                    battleSceneObjects.Add(new BattleInfo(obj, path, obj.scene.name, obj.transform));
+                }
             }
             return battleSceneObjects;
         }

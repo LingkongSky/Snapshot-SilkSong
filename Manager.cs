@@ -1,4 +1,5 @@
 ﻿using Snapshot_SilkSong.BattleState;
+using Snapshot_SilkSong.BossState;
 using Snapshot_SilkSong.EnemyState;
 using Snapshot_SilkSong.PlayerState;
 using Snapshot_SilkSong.SceneState;
@@ -18,6 +19,7 @@ namespace Snapshot
         public EnemyState enemyState;
         public BattleState battleState;
         public PersistentState persistentState;
+        public BossState bossState;
         public LiftState liftState;
         public bool isActive;
         public DateTime timestamp;
@@ -29,6 +31,7 @@ namespace Snapshot
             enemyState = new EnemyState();
             battleState = new BattleState();
             persistentState = new PersistentState();
+            bossState = new BossState();
             liftState = new LiftState();
             isActive = false;
             timestamp = DateTime.Now;
@@ -72,6 +75,8 @@ namespace Snapshot
                 PersistentState.SavePersistentState(snapshots[slotName].persistentState, slotName);
                 // 保存电梯状态
                 //LiftState.SaveLiftState(snapshots[slotName].liftState, slotName);
+                // 保存Boss场景状态
+                BossState.SaveBossState(snapshots[slotName].bossState, slotName);
 
                 snapshots[slotName].isActive = true;
                 snapshots[slotName].timestamp = DateTime.Now;
@@ -113,6 +118,7 @@ namespace Snapshot
             EnemyState.LoadEnemyState(snapshots[slotName].enemyState, slotName);
             PersistentState.LoadPersistentState(snapshots[slotName].persistentState, slotName);
             //LiftState.LoadLiftState(snapshots[slotName].liftState, slotName);
+            BossState.LoadBossState(snapshots[slotName].bossState, slotName);
 
             // 延迟0.5秒后恢复FSM
             yield return new WaitForSeconds(0.5f);

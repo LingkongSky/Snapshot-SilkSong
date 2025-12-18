@@ -39,6 +39,11 @@ namespace Snapshot_SilkSong.Utils
             static bool Prefix_Fsm_OnEnable() => Prefix_OtherType("Fsm", "OnEnable");
 
             /*
+            [HarmonyPatch(typeof(PlayMakerFSM), "Awake"), HarmonyPrefix] 
+            static bool Prefix_PlayMakerFSM_Awake() => Prefix_OtherType("PlayMakerFSM", "Awake");
+            */
+
+            /*
             [HarmonyPatch(typeof(PlayMakerFSM), "Reset"), HarmonyPrefix] // 避免Enable时实体重置状态
             static bool Prefix_PlayMakerFSM_Reset() => Prefix_OtherType("PlayMakerFSM", "Reset");
             */

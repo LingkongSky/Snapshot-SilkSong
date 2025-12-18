@@ -71,12 +71,33 @@ namespace Snapshot_SilkSong.Utils
         }
 
         // 根据路径设置游戏对象的父级
-        public static void PlaceGameObjectToPath(GameObject obj, string path)
+        public static void PlaceGameObjectToPath(GameObject obj, string path, string sceneName)
         {
             if (string.IsNullOrEmpty(path))
                 return;
 
             string[] pathParts = path.Split('/');
+
+            // 步骤1：首先将对象移动到正确的场景（如果有父级，这会自动移除父级）
+            Scene targetScene = SceneManager.GetActiveScene(); // 默认为当前场景
+
+            if (!string.IsNullOrEmpty(sceneName))
+            {
+                Scene namedScene = SceneManager.GetSceneByName(sceneName);
+                if (namedScene.IsValid() && namedScene.isLoaded)
+                {
+                    targetScene = namedScene;
+                    // 在设置父级之前移动场景
+                    if (obj.scene != targetScene)
+                    {
+                        SceneManager.MoveGameObjectToScene(obj, targetScene);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"Scene '{sceneName}' is not loaded, using active scene instead.");
+                }
+            }
 
             // 如果是根节点，不需要设置父级
             if (pathParts.Length == 1)
@@ -96,8 +117,8 @@ namespace Snapshot_SilkSong.Utils
 
                 if (parentTransform == null)
                 {
-                    // 查找根物体
-                    GameObject[] rootObjects = SceneManager.GetActiveScene().GetRootGameObjects();
+                    // 在目标场景中查找根物体
+                    GameObject[] rootObjects = targetScene.GetRootGameObjects();
                     GameObject foundRoot = null;
                     foreach (GameObject rootObj in rootObjects)
                     {
@@ -116,6 +137,9 @@ namespace Snapshot_SilkSong.Utils
                         newParent.transform.rotation = Quaternion.identity;
                         newParent.transform.localScale = Vector3.one;
                         parentTransform = newParent.transform;
+
+                        // 确保新父级在正确场景中
+                        SceneManager.MoveGameObjectToScene(newParent, targetScene);
                     }
                     else
                     {
@@ -165,6 +189,5 @@ namespace Snapshot_SilkSong.Utils
             // 设置对象名称（最后一个路径部分）
             obj.name = pathParts[pathParts.Length - 1];
         }
-
     }
-}
+    }
