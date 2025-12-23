@@ -132,6 +132,7 @@
   <ItemGroup>
     <Compile Include="States\BattleState.cs" />
     <Compile Include="States\BossState.cs" />
+    <Compile Include="States\CocoonState.cs" />
     <Compile Include="States\LiftState.cs" />
     <Compile Include="States\PersistentState.cs" />
     <Compile Include="Utils\ConfigManager.cs" />

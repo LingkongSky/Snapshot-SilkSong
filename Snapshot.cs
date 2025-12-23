@@ -5,7 +5,7 @@ using Snapshot_SilkSong.Utils.Snapshot_SilkSong.Patches;
 using System;
 namespace Snapshot
 {
-    [BepInPlugin("Lingkong.Snapshot.SilkSong", "Silk Sogn Shapshot", "1.1.0.0")]
+    [BepInPlugin("Lingkong.Snapshot.SilkSong", "Silk Sogn Shapshot", "1.2.0.0")]
     [Serializable]
     public class Snapshot : BaseUnityPlugin
     {
@@ -19,7 +19,6 @@ namespace Snapshot
             Harmony.CreateAndPatchAll(typeof(StatePatches), null);
 
             configManager = new ConfigManagers();
-
         }
 
         void Start()

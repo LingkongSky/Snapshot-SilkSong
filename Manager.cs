@@ -20,6 +20,7 @@ namespace Snapshot
         public BattleState battleState;
         public PersistentState persistentState;
         public BossState bossState;
+        public CocoonState cocoonState;
         public LiftState liftState;
         public bool isActive;
         public DateTime timestamp;
@@ -32,6 +33,7 @@ namespace Snapshot
             battleState = new BattleState();
             persistentState = new PersistentState();
             bossState = new BossState();
+            cocoonState = new CocoonState();
             liftState = new LiftState();
             isActive = false;
             timestamp = DateTime.Now;
@@ -77,6 +79,8 @@ namespace Snapshot
                 //LiftState.SaveLiftState(snapshots[slotName].liftState, slotName);
                 // 保存Boss场景状态
                 BossState.SaveBossState(snapshots[slotName].bossState, slotName);
+                // 保存茧状态
+                CocoonState.SaveCocoonState(snapshots[slotName].cocoonState, slotName);
 
                 snapshots[slotName].isActive = true;
                 snapshots[slotName].timestamp = DateTime.Now;
@@ -117,6 +121,7 @@ namespace Snapshot
             BattleState.LoadBattleState(snapshots[slotName].battleState, slotName);
             EnemyState.LoadEnemyState(snapshots[slotName].enemyState, slotName);
             PersistentState.LoadPersistentState(snapshots[slotName].persistentState, slotName);
+            CocoonState.LoadCocoonState(snapshots[slotName].cocoonState, slotName);
             //LiftState.LoadLiftState(snapshots[slotName].liftState, slotName);
             BossState.LoadBossState(snapshots[slotName].bossState, slotName);
 
