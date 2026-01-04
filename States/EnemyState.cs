@@ -106,24 +106,40 @@ namespace Snapshot_SilkSong.EnemyState
                 {
                     if (obj == null || obj.gameObject.scene != scene) continue;
 
+                    // 要求同时有生命组件及尸体组件
                     var healthManager = obj.GetComponent<HealthManager>();
                     var activeCorpse = obj.GetComponent<ActiveCorpse>();
 
                     if (healthManager == null && activeCorpse == null) continue;
 
-                    // 检查父对象是否有 BattleWave 组件
-                    Transform parent = obj.transform.parent;
-                    if (parent != null)
-                    {
-                        var battleWave = parent.GetComponent<BattleWave>();
-                        var battleScene = parent.GetComponent<BattleScene>();
+                    // 检查所有祖先（父组件及以上）是否有BattleScene组件
+                    bool hasBattleSceneInAncestors = false;
+                    Transform currentParent = obj.transform.parent;
 
-                        if (battleWave != null || battleScene != null)
+                    while (currentParent != null)
+                    {
+                        var battleScene = currentParent.GetComponent<BattleScene>();
+                        if (battleScene != null)
                         {
-                            continue;
+                            hasBattleSceneInAncestors = true;
+                            break;
                         }
+                        currentParent = currentParent.parent; // 继续向上查找
                     }
 
+                    if (hasBattleSceneInAncestors)
+                    {
+                        continue;
+                    }
+
+                    string path = ObjectFinder.GetGameObjectPath(obj);
+
+                    if (path.Contains("Boss Scene"))
+                    {
+                        continue;
+                    }
+
+                    // 避免获取到玩家
                     bool hasHeroController = false;
                     foreach (Transform child in obj.transform)
                     {

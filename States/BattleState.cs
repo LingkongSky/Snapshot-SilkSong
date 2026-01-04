@@ -41,7 +41,6 @@ namespace Snapshot_SilkSong.BattleState
             BattleSceneList = new List<BattleInfo>();
         }
 
-
         // 保存战斗场景状态
         public static void SaveBattleState(BattleState battleState, String path)
         {
@@ -128,6 +127,12 @@ namespace Snapshot_SilkSong.BattleState
                     }
 
                     string path = ObjectFinder.GetGameObjectPath(obj);
+
+                    if (path.Contains("Boss Scene"))
+                    {
+                        continue;
+                    }
+
                     battleSceneObjects.Add(new BattleInfo(obj, path, obj.scene.name, obj.transform));
                 }
             }

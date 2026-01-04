@@ -104,11 +104,11 @@ namespace Snapshot_SilkSong.States
                     Transform parent = obj.transform.parent;
                     if (parent != null)
                     {
-                        var battleWave = parent.GetComponent<HealthManager>();
+                        var healthManager = parent.GetComponent<HealthManager>();
                         var battleScene = parent.GetComponent<BattleScene>();
                         var liftPlatform = obj.GetComponent<LiftPlatform>();
 
-                        if (battleWave != null || battleScene != null || liftPlatform != null)
+                        if (healthManager != null || battleScene != null || liftPlatform != null)
                         {
                             continue;
                         }

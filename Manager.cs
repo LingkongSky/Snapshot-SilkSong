@@ -21,7 +21,6 @@ namespace Snapshot
         public PersistentState persistentState;
         public BossState bossState;
         public CocoonState cocoonState;
-        public LiftState liftState;
         public bool isActive;
         public DateTime timestamp;
 
@@ -34,7 +33,6 @@ namespace Snapshot
             persistentState = new PersistentState();
             bossState = new BossState();
             cocoonState = new CocoonState();
-            liftState = new LiftState();
             isActive = false;
             timestamp = DateTime.Now;
         }
@@ -67,20 +65,19 @@ namespace Snapshot
 
                 // 保存玩家状态
                 PlayerState.SavePlayerState(snapshots[slotName].playerState, slotName);
-                // 保存场景状态
+                // 保存人物位置状态
                 SceneState.SaveSceneState(snapshots[slotName].sceneState, slotName);
+                // 保存茧状态
+                CocoonState.SaveCocoonState(snapshots[slotName].cocoonState, slotName);
+                // 保存Boss场景状态
+                BossState.SaveBossState(snapshots[slotName].bossState, slotName);
                 // 保存战斗场景状态
                 BattleState.SaveBattleState(snapshots[slotName].battleState, slotName);
                 // 保存敌人状态
                 EnemyState.SaveEnemyState(snapshots[slotName].enemyState, slotName);
                 // 保存持久化状态
                 PersistentState.SavePersistentState(snapshots[slotName].persistentState, slotName);
-                // 保存电梯状态
-                //LiftState.SaveLiftState(snapshots[slotName].liftState, slotName);
-                // 保存Boss场景状态
-                BossState.SaveBossState(snapshots[slotName].bossState, slotName);
-                // 保存茧状态
-                CocoonState.SaveCocoonState(snapshots[slotName].cocoonState, slotName);
+
 
                 snapshots[slotName].isActive = true;
                 snapshots[slotName].timestamp = DateTime.Now;
@@ -118,12 +115,11 @@ namespace Snapshot
             yield return SceneState.LoadSceneStateCoroutine(snapshots[slotName].sceneState, slotName);
 
             PlayerState.LoadPlayerState(snapshots[slotName].playerState, slotName);
+            CocoonState.LoadCocoonState(snapshots[slotName].cocoonState, slotName);
+            BossState.LoadBossState(snapshots[slotName].bossState, slotName);
             BattleState.LoadBattleState(snapshots[slotName].battleState, slotName);
             EnemyState.LoadEnemyState(snapshots[slotName].enemyState, slotName);
             PersistentState.LoadPersistentState(snapshots[slotName].persistentState, slotName);
-            CocoonState.LoadCocoonState(snapshots[slotName].cocoonState, slotName);
-            //LiftState.LoadLiftState(snapshots[slotName].liftState, slotName);
-            BossState.LoadBossState(snapshots[slotName].bossState, slotName);
 
             // 延迟0.5秒后恢复FSM
             yield return new WaitForSeconds(0.5f);
