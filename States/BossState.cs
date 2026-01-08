@@ -49,7 +49,8 @@ namespace Snapshot_SilkSong.BossState
             // 清理旧数据
             foreach (BossInfo bossScene in bossState.BossSceneList)
             {
-                GameObject.Destroy(bossScene.targetObject);
+                if (bossScene.targetObject != null)
+                    GameObject.DestroyImmediate(bossScene.targetObject);
             }
 
             bossState.BossSceneList.Clear();
@@ -57,10 +58,13 @@ namespace Snapshot_SilkSong.BossState
             // 获取当前场景需要保存的对象
             List<BossInfo> tempBossScenes = FindBossScene();
 
+            if (tempBossScenes == null || tempBossScenes.Count == 0) return;
+
             foreach (BossInfo obj in tempBossScenes)
             {
                 GameObject originalObj = obj.targetObject;
                 GameObject clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "BossStates/").transform);
+                ObjectFinder.DeleteHealthManagerImmediate(clone);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
                 BossInfo newInfo = new BossInfo(clone, obj.path, originalObj.scene.name, originalObj.transform);
@@ -78,8 +82,10 @@ namespace Snapshot_SilkSong.BossState
             foreach (BossInfo obj in currentSceneObjects)
             {
                 if (obj.targetObject != null)
-                    GameObject.Destroy(obj.targetObject);
+                    GameObject.DestroyImmediate(obj.targetObject);
             }
+
+            if (bossState.BossSceneList == null || bossState.BossSceneList.Count == 0) return;
 
             // 从存档列表恢复
             foreach (BossInfo savedInfo in bossState.BossSceneList)

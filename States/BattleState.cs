@@ -49,7 +49,8 @@ namespace Snapshot_SilkSong.BattleState
             // 清理旧数据
             foreach (BattleInfo battleScene in battleState.BattleSceneList)
             {
-                GameObject.Destroy(battleScene.targetObject);
+                if (battleScene.targetObject != null)
+                    GameObject.DestroyImmediate(battleScene.targetObject);
             }
 
             battleState.BattleSceneList.Clear();
@@ -57,10 +58,13 @@ namespace Snapshot_SilkSong.BattleState
             // 获取当前场景需要保存的对象
             List<BattleInfo> tempBattleScenes = FindBattleScene();
 
+            if (tempBattleScenes == null || tempBattleScenes.Count == 0) return;
+
             foreach (BattleInfo obj in tempBattleScenes)
             {
                 GameObject originalObj = obj.targetObject;
                 GameObject clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "BattleStates/").transform);
+                ObjectFinder.DeleteHealthManagerImmediate(clone);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
                 BattleInfo newInfo = new BattleInfo(clone, obj.path, originalObj.scene.name, originalObj.transform);
@@ -79,8 +83,10 @@ namespace Snapshot_SilkSong.BattleState
             foreach (BattleInfo obj in currentSceneObjects)
             {
                 if (obj.targetObject != null)
-                    GameObject.Destroy(obj.targetObject);
+                    GameObject.DestroyImmediate(obj.targetObject);
             }
+
+            if (battleState.BattleSceneList == null || battleState.BattleSceneList.Count == 0) return;
 
             // 从存档列表恢复
             foreach (BattleInfo savedInfo in battleState.BattleSceneList)

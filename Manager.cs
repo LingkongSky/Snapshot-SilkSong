@@ -3,6 +3,7 @@ using Snapshot_SilkSong.BossState;
 using Snapshot_SilkSong.EnemyState;
 using Snapshot_SilkSong.PlayerState;
 using Snapshot_SilkSong.SceneState;
+using Snapshot_SilkSong.CocoonState;
 using Snapshot_SilkSong.States;
 using Snapshot_SilkSong.Utils;
 using System;
@@ -122,7 +123,7 @@ namespace Snapshot
             PersistentState.LoadPersistentState(snapshots[slotName].persistentState, slotName);
 
             // 延迟0.5秒后恢复FSM
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
             StateController.IsFsmEnabled = true;
 
             // 重置协程标志

@@ -1,4 +1,5 @@
-﻿using Snapshot_SilkSong.Utils;
+﻿using Snapshot_SilkSong.BattleState;
+using Snapshot_SilkSong.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -30,26 +31,34 @@ namespace Snapshot_SilkSong.States
 
     public class PersistentState
     {
-        public List<PersistentInfo> healthManagers = new List<PersistentInfo>();
+        public List<PersistentInfo> persistentList = new List<PersistentInfo>();
 
         // 保存实体状态
         public static void SavePersistentState(PersistentState persistentState, string path)
         {
             ObjectFinder.EnsureDontDestroyOnLoadObject(path, "PersistentState");
 
-            persistentState.healthManagers.ForEach(info => GameObject.Destroy(info.targetObject));
-            persistentState.healthManagers.Clear();
-
-            foreach (var obj in FindPersistentBoolItemInDirectChildren())
+            foreach (PersistentInfo persistent in persistentState.persistentList)
             {
-                //Debug.Log("Saving Persistent: " + obj.path);
+                if (persistent.targetObject != null)
+                    GameObject.DestroyImmediate(persistent.targetObject);
+            }
+
+            persistentState.persistentList.Clear();
+
+
+            List<PersistentInfo> tempPersistentList = FindPersistentBoolItemInDirectChildren();
+            if (tempPersistentList == null || tempPersistentList.Count == 0) return;
+
+            foreach (var obj in tempPersistentList)
+            {
                 var originalObj = obj.targetObject;
                 var clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "/PersistentState").transform);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
 
                 var newInfo = new PersistentInfo(clone, obj.path, originalObj.scene.name, obj.isActive, originalObj.transform);
-                persistentState.healthManagers.Add(newInfo);
+                persistentState.persistentList.Add(newInfo);
             }
 
             UnityEngine.Object.DontDestroyOnLoad(GameObject.Find(path).transform);
@@ -61,10 +70,13 @@ namespace Snapshot_SilkSong.States
             FindPersistentBoolItemInDirectChildren().ForEach(obj =>
             {
                 if (obj.targetObject != null)
-                    GameObject.Destroy(obj.targetObject);
+                    GameObject.DestroyImmediate(obj.targetObject);
             });
 
-            foreach (var savedInfo in persistentState.healthManagers)
+            if (persistentState.persistentList == null || persistentState.persistentList.Count == 0) return;
+
+
+            foreach (var savedInfo in persistentState.persistentList)
             {
                 //Debug.Log("Load Persistent: " + savedInfo.path);
 
@@ -101,17 +113,27 @@ namespace Snapshot_SilkSong.States
                 {
                     if (obj == null || obj.gameObject.scene != scene) continue;
 
-                    Transform parent = obj.transform.parent;
-                    if (parent != null)
-                    {
-                        var healthManager = parent.GetComponent<HealthManager>();
-                        var battleScene = parent.GetComponent<BattleScene>();
-                        var liftPlatform = obj.GetComponent<LiftPlatform>();
+                    bool shouldExclude = false;
+                    Transform currentParent = obj.transform.parent;
 
-                        if (healthManager != null || battleScene != null || liftPlatform != null)
+                    while (currentParent != null)
+                    {
+                        var healthManager = currentParent.GetComponent<HealthManager>();
+                        var battleScene = currentParent.GetComponent<BattleScene>();
+                        string name = obj.gameObject.name;
+
+                        if (healthManager != null || battleScene != null || name == "Battle Scene")
                         {
-                            continue;
+                            shouldExclude = true;
+                            break;
                         }
+
+                        currentParent = currentParent.parent;
+                    }
+
+                    if (shouldExclude)
+                    {
+                        continue;
                     }
 
                     bool hasHeroController = false;
@@ -137,8 +159,8 @@ namespace Snapshot_SilkSong.States
                     }
                 }
             }
-
             return result;
         }
+
     }
 }

@@ -78,7 +78,6 @@ namespace Snapshot_SilkSong.Utils
 
             string[] pathParts = path.Split('/');
 
-            // 步骤1：首先将对象移动到正确的场景（如果有父级，这会自动移除父级）
             Scene targetScene = SceneManager.GetActiveScene(); // 默认为当前场景
 
             if (!string.IsNullOrEmpty(sceneName))
@@ -189,5 +188,31 @@ namespace Snapshot_SilkSong.Utils
             // 设置对象名称（最后一个路径部分）
             obj.name = pathParts[pathParts.Length - 1];
         }
+
+        public static void DeleteHealthManagerImmediate(GameObject rootObject)
+        {
+            if (rootObject == null)
+            {
+                return;
+            }
+
+            HealthManager[] healthManagers = rootObject.GetComponentsInChildren<HealthManager>(true);
+
+            if (healthManagers.Length == 0)
+            {
+                return;
+            }
+
+            foreach (HealthManager healthManager in healthManagers)
+            {
+                if (healthManager != null && healthManager.gameObject != null)
+                {
+                    string objectPath = GetGameObjectPath(healthManager.gameObject);
+                    UnityEngine.Object.DestroyImmediate(healthManager.gameObject);
+                }
+            }
+        }
+
     }
-    }
+
+}

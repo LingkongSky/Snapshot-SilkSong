@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Snapshot_SilkSong.BattleState
+namespace Snapshot_SilkSong.CocoonState
 {
     [System.Serializable]
     public class CocoonInfo
@@ -49,13 +49,15 @@ namespace Snapshot_SilkSong.BattleState
             // 清理旧数据
             foreach (CocoonInfo cocoonScene in cocoonState.CocoonSceneList)
             {
-                GameObject.Destroy(cocoonScene.targetObject);
+                if (cocoonScene.targetObject != null)
+                    GameObject.DestroyImmediate(cocoonScene.targetObject);
             }
 
             cocoonState.CocoonSceneList.Clear();
 
             // 获取当前场景需要保存的对象
             List<CocoonInfo> tempCocoonScenes = FindCocoonScene();
+            if (tempCocoonScenes == null || tempCocoonScenes.Count == 0) return;
 
             foreach (CocoonInfo obj in tempCocoonScenes)
             {
@@ -79,8 +81,10 @@ namespace Snapshot_SilkSong.BattleState
             foreach (CocoonInfo obj in currentSceneObjects)
             {
                 if (obj.targetObject != null)
-                    GameObject.Destroy(obj.targetObject);
+                    GameObject.DestroyImmediate(obj.targetObject);
             }
+
+            if (cocoonState.CocoonSceneList == null || cocoonState.CocoonSceneList.Count == 0) return;
 
             // 从存档列表恢复
             foreach (CocoonInfo savedInfo in cocoonState.CocoonSceneList)

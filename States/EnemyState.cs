@@ -1,4 +1,6 @@
-﻿using Snapshot_SilkSong.Utils;
+﻿using Snapshot_SilkSong.BattleState;
+using Snapshot_SilkSong.States;
+using Snapshot_SilkSong.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -30,23 +32,27 @@ namespace Snapshot_SilkSong.EnemyState
 
     public class EnemyState
     {
-        public List<EnemyInfo> healthManagers = new List<EnemyInfo>();
+        public List<EnemyInfo> enemyList = new List<EnemyInfo>();
 
         // 保存实体状态
         public static void SaveEnemyState(EnemyState enemyState, string path)
         {
             ObjectFinder.EnsureDontDestroyOnLoadObject(path, "EnemyState");
 
-            enemyState.healthManagers.ForEach(info => GameObject.Destroy(info.targetObject));
-            enemyState.healthManagers.Clear();
+            enemyState.enemyList.ForEach(info => GameObject.DestroyImmediate(info.targetObject));
+            enemyState.enemyList.Clear();
 
-            foreach (var obj in FindHealthManagerInDirectChildren())
+            foreach (EnemyInfo enemy in enemyState.enemyList)
             {
-                if (obj.path.Contains("Boss Scene"))
-                {
-                    continue;
-                }
+                if (enemy.targetObject != null)
+                    GameObject.DestroyImmediate(enemy.targetObject);
+            }
 
+            List<EnemyInfo> temphealthManager = FindHealthManagerInDirectChildren();
+            if (temphealthManager == null || temphealthManager.Count == 0) return;
+
+            foreach (var obj in temphealthManager)
+            {
                 //Debug.Log("Saving Enemy: " + obj.path);
                 var originalObj = obj.targetObject;
                 var clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "/EnemyState").transform);
@@ -54,7 +60,7 @@ namespace Snapshot_SilkSong.EnemyState
                 clone.name = originalObj.name;
 
                 var newInfo = new EnemyInfo(clone, obj.path, originalObj.scene.name, obj.isActive, originalObj.transform);
-                enemyState.healthManagers.Add(newInfo);
+                enemyState.enemyList.Add(newInfo);
             }
 
             UnityEngine.Object.DontDestroyOnLoad(GameObject.Find(path).transform);
@@ -66,12 +72,13 @@ namespace Snapshot_SilkSong.EnemyState
             FindHealthManagerInDirectChildren().ForEach(obj =>
             {
                 if (obj.targetObject != null)
-                    GameObject.Destroy(obj.targetObject);
+                    GameObject.DestroyImmediate(obj.targetObject);
             });
 
-            foreach (var savedInfo in enemyState.healthManagers)
-            {
+            if (enemyState.enemyList == null || enemyState.enemyList.Count == 0) return;
 
+            foreach (var savedInfo in enemyState.enemyList)
+            {
                 var clone = GameObject.Instantiate(savedInfo.targetObject);
 
                 ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path, savedInfo.sceneName);
@@ -112,33 +119,6 @@ namespace Snapshot_SilkSong.EnemyState
 
                     if (healthManager == null && activeCorpse == null) continue;
 
-                    // 检查所有祖先（父组件及以上）是否有BattleScene组件
-                    bool hasBattleSceneInAncestors = false;
-                    Transform currentParent = obj.transform.parent;
-
-                    while (currentParent != null)
-                    {
-                        var battleScene = currentParent.GetComponent<BattleScene>();
-                        if (battleScene != null)
-                        {
-                            hasBattleSceneInAncestors = true;
-                            break;
-                        }
-                        currentParent = currentParent.parent; // 继续向上查找
-                    }
-
-                    if (hasBattleSceneInAncestors)
-                    {
-                        continue;
-                    }
-
-                    string path = ObjectFinder.GetGameObjectPath(obj);
-
-                    if (path.Contains("Boss Scene"))
-                    {
-                        continue;
-                    }
-
                     // 避免获取到玩家
                     bool hasHeroController = false;
                     foreach (Transform child in obj.transform)
@@ -154,12 +134,6 @@ namespace Snapshot_SilkSong.EnemyState
                     {
                         var gameObject = obj.gameObject;
                         string objectPath = ObjectFinder.GetGameObjectPath(gameObject);
-
-                        if (objectPath.Contains("Boss Scene"))
-                        {
-                            continue;
-                        }
-
                         result.Add(new EnemyInfo(
                             gameObject,
                             objectPath,
