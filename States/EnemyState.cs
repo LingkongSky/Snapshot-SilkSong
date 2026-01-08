@@ -1,38 +1,14 @@
-﻿using Snapshot_SilkSong.BattleState;
-using Snapshot_SilkSong.States;
-using Snapshot_SilkSong.Utils;
+﻿using Snapshot_SilkSong.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Snapshot_SilkSong.EnemyState
 {
-    [System.Serializable]
-    public class EnemyInfo
-    {
-        public GameObject targetObject;
-        public string path;
-        public string sceneName;
-        public bool isActive;
-        public Vector3 savedLocalPosition;
-        public Quaternion savedLocalRotation;
-        public Vector3 savedLocalScale;
-
-        public EnemyInfo(GameObject gameObject, string path, string sceneName, bool isActive, Transform originalTransform)
-        {
-            this.targetObject = gameObject;
-            this.path = path;
-            this.sceneName = sceneName;
-            this.isActive = isActive;
-            this.savedLocalPosition = originalTransform.localPosition;
-            this.savedLocalRotation = originalTransform.localRotation;
-            this.savedLocalScale = originalTransform.localScale;
-        }
-    }
 
     public class EnemyState
     {
-        public List<EnemyInfo> enemyList = new List<EnemyInfo>();
+        public List<ObjectInfo> enemyList = new List<ObjectInfo>();
 
         // 保存实体状态
         public static void SaveEnemyState(EnemyState enemyState, string path)
@@ -42,13 +18,13 @@ namespace Snapshot_SilkSong.EnemyState
             enemyState.enemyList.ForEach(info => GameObject.DestroyImmediate(info.targetObject));
             enemyState.enemyList.Clear();
 
-            foreach (EnemyInfo enemy in enemyState.enemyList)
+            foreach (ObjectInfo enemy in enemyState.enemyList)
             {
                 if (enemy.targetObject != null)
                     GameObject.DestroyImmediate(enemy.targetObject);
             }
 
-            List<EnemyInfo> temphealthManager = FindHealthManagerInDirectChildren();
+            List<ObjectInfo> temphealthManager = FindHealthManagerInDirectChildren();
             if (temphealthManager == null || temphealthManager.Count == 0) return;
 
             foreach (var obj in temphealthManager)
@@ -59,7 +35,7 @@ namespace Snapshot_SilkSong.EnemyState
                 clone.SetActive(false);
                 clone.name = originalObj.name;
 
-                var newInfo = new EnemyInfo(clone, obj.path, originalObj.scene.name, obj.isActive, originalObj.transform);
+                var newInfo = new ObjectInfo(clone, obj.path, originalObj.scene.name, obj.isActive, originalObj.transform);
                 enemyState.enemyList.Add(newInfo);
             }
 
@@ -79,6 +55,11 @@ namespace Snapshot_SilkSong.EnemyState
 
             foreach (var savedInfo in enemyState.enemyList)
             {
+                if (savedInfo.targetObject == null)
+                {
+                    continue;
+                }
+
                 var clone = GameObject.Instantiate(savedInfo.targetObject);
 
                 ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path, savedInfo.sceneName);
@@ -92,9 +73,9 @@ namespace Snapshot_SilkSong.EnemyState
         }
 
         // 获取所有非特殊场景中的游戏实体对象
-        public static List<EnemyInfo> FindHealthManagerInDirectChildren()
+        public static List<ObjectInfo> FindHealthManagerInDirectChildren()
         {
-            var result = new List<EnemyInfo>();
+            var result = new List<ObjectInfo>();
 
             // 遍历所有已加载的场景
             for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -134,7 +115,7 @@ namespace Snapshot_SilkSong.EnemyState
                     {
                         var gameObject = obj.gameObject;
                         string objectPath = ObjectFinder.GetGameObjectPath(gameObject);
-                        result.Add(new EnemyInfo(
+                        result.Add(new ObjectInfo(
                             gameObject,
                             objectPath,
                             gameObject.scene.name,

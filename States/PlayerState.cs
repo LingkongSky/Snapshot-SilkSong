@@ -52,7 +52,7 @@ namespace Snapshot_SilkSong.PlayerState
             ExtraToolEquips = new FloatingCrestSlotsData();
         }
 
-        public static void SavePlayerState(PlayerState playerState, String path)
+        public static void SavePlayerState(PlayerState playerState)
         {
             PlayerData playerData = PlayerData.instance;
             HeroController hero = HeroController.instance;
@@ -121,7 +121,7 @@ namespace Snapshot_SilkSong.PlayerState
 
         }
 
-        public static void LoadPlayerState(PlayerState playerState, String path)
+        public static void LoadPlayerState(PlayerState playerState)
         {
             PlayerData playerData = PlayerData.instance;
             HeroController hero = HeroController.instance;

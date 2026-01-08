@@ -65,9 +65,9 @@ namespace Snapshot
                 }
 
                 // 保存玩家状态
-                PlayerState.SavePlayerState(snapshots[slotName].playerState, slotName);
+                PlayerState.SavePlayerState(snapshots[slotName].playerState);
                 // 保存人物位置状态
-                SceneState.SaveSceneState(snapshots[slotName].sceneState, slotName);
+                SceneState.SaveSceneState(snapshots[slotName].sceneState);
                 // 保存茧状态
                 CocoonState.SaveCocoonState(snapshots[slotName].cocoonState, slotName);
                 // 保存Boss场景状态
@@ -78,7 +78,8 @@ namespace Snapshot
                 EnemyState.SaveEnemyState(snapshots[slotName].enemyState, slotName);
                 // 保存持久化状态
                 PersistentState.SavePersistentState(snapshots[slotName].persistentState, slotName);
-
+                // 保存FSM状态
+                FSMState.SaveFSMState(snapshots[slotName]);
 
                 snapshots[slotName].isActive = true;
                 snapshots[slotName].timestamp = DateTime.Now;
@@ -113,14 +114,15 @@ namespace Snapshot
             Debug.Log("Start to load the Snapshot");
             StateController.IsFsmEnabled = false;
 
-            yield return SceneState.LoadSceneStateCoroutine(snapshots[slotName].sceneState, slotName);
+            yield return SceneState.LoadSceneStateCoroutine(snapshots[slotName].sceneState);
 
-            PlayerState.LoadPlayerState(snapshots[slotName].playerState, slotName);
+            PlayerState.LoadPlayerState(snapshots[slotName].playerState);
             CocoonState.LoadCocoonState(snapshots[slotName].cocoonState, slotName);
             BossState.LoadBossState(snapshots[slotName].bossState, slotName);
             BattleState.LoadBattleState(snapshots[slotName].battleState, slotName);
             EnemyState.LoadEnemyState(snapshots[slotName].enemyState, slotName);
             PersistentState.LoadPersistentState(snapshots[slotName].persistentState, slotName);
+            FSMState.LoadFSMState(snapshots[slotName]);
 
             // 延迟0.5秒后恢复FSM
             yield return new WaitForSeconds(0.1f);

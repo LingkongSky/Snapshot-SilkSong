@@ -6,39 +6,16 @@ using UnityEngine.SceneManagement;
 
 namespace Snapshot_SilkSong.BattleState
 {
-    [System.Serializable]
-    public class BattleInfo
-    {
-        public GameObject targetObject;
-        public string path;
-        public string sceneName; 
-
-        public Vector3 savedLocalPosition;
-        public Quaternion savedLocalRotation;
-        public Vector3 savedLocalScale;
-
-        public BattleInfo(GameObject gameObject, string path, string sceneName, Transform originalTransform)
-        {
-            this.targetObject = gameObject;
-            this.path = path;
-            this.sceneName = sceneName;
-            
-            // 从原始 Transform 中记录局部信息
-            this.savedLocalPosition = originalTransform.localPosition;
-            this.savedLocalRotation = originalTransform.localRotation;
-            this.savedLocalScale = originalTransform.localScale;
-        }
-    }
     /*
     路径：DontDestroyOnLoad/1/BattleState/
     */
     public class BattleState
     {
-        public List<BattleInfo> BattleSceneList;
+        public List<ObjectInfo> BattleSceneList;
 
         public BattleState()
         {
-            BattleSceneList = new List<BattleInfo>();
+            BattleSceneList = new List<ObjectInfo>();
         }
 
         // 保存战斗场景状态
@@ -47,7 +24,7 @@ namespace Snapshot_SilkSong.BattleState
             ObjectFinder.EnsureDontDestroyOnLoadObject(path, "BattleStates");
 
             // 清理旧数据
-            foreach (BattleInfo battleScene in battleState.BattleSceneList)
+            foreach (ObjectInfo battleScene in battleState.BattleSceneList)
             {
                 if (battleScene.targetObject != null)
                     GameObject.DestroyImmediate(battleScene.targetObject);
@@ -56,18 +33,18 @@ namespace Snapshot_SilkSong.BattleState
             battleState.BattleSceneList.Clear();
 
             // 获取当前场景需要保存的对象
-            List<BattleInfo> tempBattleScenes = FindBattleScene();
+            List<ObjectInfo> tempBattleScenes = FindBattleScene();
 
             if (tempBattleScenes == null || tempBattleScenes.Count == 0) return;
 
-            foreach (BattleInfo obj in tempBattleScenes)
+            foreach (ObjectInfo obj in tempBattleScenes)
             {
                 GameObject originalObj = obj.targetObject;
                 GameObject clone = GameObject.Instantiate(originalObj, GameObject.Find(path + "BattleStates/").transform);
                 ObjectFinder.DeleteHealthManagerImmediate(clone);
                 clone.SetActive(false);
                 clone.name = originalObj.name;
-                BattleInfo newInfo = new BattleInfo(clone, obj.path, originalObj.scene.name, originalObj.transform);
+                ObjectInfo newInfo = new ObjectInfo(clone, obj.path, originalObj.scene.name, obj.isActive, originalObj.transform);
                 battleState.BattleSceneList.Add(newInfo);
             }
 
@@ -79,8 +56,8 @@ namespace Snapshot_SilkSong.BattleState
         public static void LoadBattleState(BattleState battleState, String path)
         {
             // 清理当前场景中已存在的同类对象
-            List<BattleInfo> currentSceneObjects = FindBattleScene();
-            foreach (BattleInfo obj in currentSceneObjects)
+            List<ObjectInfo> currentSceneObjects = FindBattleScene();
+            foreach (ObjectInfo obj in currentSceneObjects)
             {
                 if (obj.targetObject != null)
                     GameObject.DestroyImmediate(obj.targetObject);
@@ -89,8 +66,13 @@ namespace Snapshot_SilkSong.BattleState
             if (battleState.BattleSceneList == null || battleState.BattleSceneList.Count == 0) return;
 
             // 从存档列表恢复
-            foreach (BattleInfo savedInfo in battleState.BattleSceneList)
+            foreach (ObjectInfo savedInfo in battleState.BattleSceneList)
             {
+                if (savedInfo.targetObject == null)
+                {
+                    continue;
+                }
+
                 GameObject clone = GameObject.Instantiate(savedInfo.targetObject);
                 clone.name = savedInfo.targetObject.name;
 
@@ -104,9 +86,9 @@ namespace Snapshot_SilkSong.BattleState
             }
         }
 
-        public static List<BattleInfo> FindBattleScene()
+        public static List<ObjectInfo> FindBattleScene()
         {
-            List<BattleInfo> battleSceneObjects = new List<BattleInfo>();
+            List<ObjectInfo> battleSceneObjects = new List<ObjectInfo>();
 
             // 遍历所有已加载的场景
             for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -139,7 +121,7 @@ namespace Snapshot_SilkSong.BattleState
                         continue;
                     }
 
-                    battleSceneObjects.Add(new BattleInfo(obj, path, obj.scene.name, obj.transform));
+                    battleSceneObjects.Add(new ObjectInfo(obj, path, obj.scene.name, obj.activeSelf, obj.transform));
                 }
             }
             return battleSceneObjects;

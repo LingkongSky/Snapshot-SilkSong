@@ -1,44 +1,20 @@
-﻿using Snapshot_SilkSong.BattleState;
-using Snapshot_SilkSong.Utils;
+﻿using Snapshot_SilkSong.Utils;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Snapshot_SilkSong.States
 {
-    [System.Serializable]
-    public class PersistentInfo
-    {
-        public GameObject targetObject;
-        public string path;
-        public string sceneName;
-        public bool isActive;
-        public Vector3 savedLocalPosition;
-        public Quaternion savedLocalRotation;
-        public Vector3 savedLocalScale;
-
-        public PersistentInfo(GameObject gameObject, string path, string sceneName, bool isActive, Transform originalTransform)
-        {
-            this.targetObject = gameObject;
-            this.path = path;
-            this.sceneName = sceneName;
-            this.isActive = isActive;
-            this.savedLocalPosition = originalTransform.localPosition;
-            this.savedLocalRotation = originalTransform.localRotation;
-            this.savedLocalScale = originalTransform.localScale;
-        }
-    }
-
     public class PersistentState
     {
-        public List<PersistentInfo> persistentList = new List<PersistentInfo>();
+        public List<ObjectInfo> persistentList = new List<ObjectInfo>();
 
         // 保存实体状态
         public static void SavePersistentState(PersistentState persistentState, string path)
         {
             ObjectFinder.EnsureDontDestroyOnLoadObject(path, "PersistentState");
 
-            foreach (PersistentInfo persistent in persistentState.persistentList)
+            foreach (ObjectInfo persistent in persistentState.persistentList)
             {
                 if (persistent.targetObject != null)
                     GameObject.DestroyImmediate(persistent.targetObject);
@@ -47,7 +23,7 @@ namespace Snapshot_SilkSong.States
             persistentState.persistentList.Clear();
 
 
-            List<PersistentInfo> tempPersistentList = FindPersistentBoolItemInDirectChildren();
+            List<ObjectInfo> tempPersistentList = FindPersistentBoolItemInDirectChildren();
             if (tempPersistentList == null || tempPersistentList.Count == 0) return;
 
             foreach (var obj in tempPersistentList)
@@ -57,7 +33,7 @@ namespace Snapshot_SilkSong.States
                 clone.SetActive(false);
                 clone.name = originalObj.name;
 
-                var newInfo = new PersistentInfo(clone, obj.path, originalObj.scene.name, obj.isActive, originalObj.transform);
+                var newInfo = new ObjectInfo(clone, obj.path, originalObj.scene.name, obj.isActive, originalObj.transform);
                 persistentState.persistentList.Add(newInfo);
             }
 
@@ -78,8 +54,10 @@ namespace Snapshot_SilkSong.States
 
             foreach (var savedInfo in persistentState.persistentList)
             {
-                //Debug.Log("Load Persistent: " + savedInfo.path);
-
+                if (savedInfo.targetObject == null)
+                {
+                    continue;
+                }
                 var clone = GameObject.Instantiate(savedInfo.targetObject);
 
                 ObjectFinder.PlaceGameObjectToPath(clone, savedInfo.path, savedInfo.sceneName);
@@ -92,9 +70,9 @@ namespace Snapshot_SilkSong.States
             }
         }
 
-        public static List<PersistentInfo> FindPersistentBoolItemInDirectChildren()
+        public static List<ObjectInfo> FindPersistentBoolItemInDirectChildren()
         {
-            var result = new List<PersistentInfo>();
+            var result = new List<ObjectInfo>();
 
             // 遍历所有已加载的场景
             for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -149,7 +127,7 @@ namespace Snapshot_SilkSong.States
                     if (!hasHeroController)
                     {
                         var gameObject = obj.gameObject;
-                        result.Add(new PersistentInfo(
+                        result.Add(new ObjectInfo(
                             gameObject,
                             ObjectFinder.GetGameObjectPath(gameObject),
                             gameObject.scene.name,

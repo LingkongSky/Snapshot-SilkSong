@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using HutongGames.PlayMaker;
+using System.Collections;
+using UnityEngine;
 
 namespace Snapshot_SilkSong.Utils
 {
@@ -10,6 +12,7 @@ namespace Snapshot_SilkSong.Utils
         public static bool ShouldExecute() => IsFsmEnabled;
 
         public static long counter = 0;
+
     }
 
     namespace Snapshot_SilkSong.Patches
@@ -31,34 +34,15 @@ namespace Snapshot_SilkSong.Utils
             [HarmonyPatch(typeof(PlayMakerFSM), "OnDisable"), HarmonyPrefix] // 避免Disable时直接杀死实体
             static bool Prefix_PlayMakerFSM_OnDisable() => Prefix_OtherType("PlayMakerFSM", "OnDisable");
 
-            /*
-            [HarmonyPatch(typeof(LiftPlatform), "OnDisable"), HarmonyPrefix] // 处理电梯状态保存
-            static bool Prefix_LiftPlatform_OnDisable() => Prefix_OtherType("LiftPlatform", "OnDisable");
-            */
-            [HarmonyPatch(typeof(Fsm), "OnEnable"), HarmonyPrefix] // 避免Enable时实体重置状态
+            [HarmonyPatch(typeof(PlayMakerFSM), "OnEnable"), HarmonyPrefix] // 避免Enable时实体重置状态
             static bool Prefix_Fsm_OnEnable() => Prefix_OtherType("Fsm", "OnEnable");
 
-            /*
-            [HarmonyPatch(typeof(PlayMakerFSM), "Awake"), HarmonyPrefix] 
-            static bool Prefix_PlayMakerFSM_Awake() => Prefix_OtherType("PlayMakerFSM", "Awake");
-            */
 
-            /*
-            [HarmonyPatch(typeof(PlayMakerFSM), "Reset"), HarmonyPrefix] // 避免Enable时实体重置状态
-            static bool Prefix_PlayMakerFSM_Reset() => Prefix_OtherType("PlayMakerFSM", "Reset");
-            */
-            /*
-            [HarmonyPatch(typeof(PlayMakerFSM), "Init"), HarmonyPrefix]  //  避免FSM状态重置  
-            static bool Prefix_PlayMakerFSM_Init() => Prefix_OtherType("PlayMakerFSM", "Init");
-            */
+            [HarmonyPatch(typeof(PlayMakerFSM), "AddEventHandlerComponents"), HarmonyPrefix] // 避免Enable时实体重置状态
+            static bool Prefix_Fsm_AddEventHandlerComponents() => Prefix_OtherType("Fsm", "AddEventHandlerComponents");
 
-            /*
-            [HarmonyPatch(typeof(PlayMakerFSM), "Start"), HarmonyPrefix] // New
+            [HarmonyPatch(typeof(PlayMakerFSM), "Start"), HarmonyPrefix] // 避免Enable时实体重置状态
             static bool Prefix_PlayMakerFSM_Awake() => Prefix_OtherType("PlayMakerFSM", "Start");
-            
-            [HarmonyPatch(typeof(BattleScene), "OnDisable"), HarmonyPrefix]
-            static bool Prefix_BattleScene_OnDisable() => Prefix_OtherType("BattleScene", "OnDisable");
-            */
 
             [HarmonyPatch(typeof(HealthManager), "Awake"), HarmonyPrefix] // 避免TagDamager重复生成     
             static bool Prefix_PlayMakerFSM_Awake(HealthManager __instance) {

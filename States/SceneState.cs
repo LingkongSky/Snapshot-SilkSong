@@ -11,7 +11,7 @@ namespace Snapshot_SilkSong.SceneState
         public String entryGate;
         public UnityEngine.Vector3 position;
 
-        public static void SaveSceneState(SceneState sceneState, String path)
+        public static void SaveSceneState(SceneState sceneState)
         {
             GameManager gameData = GameManager.instance;
             HeroController heroData = HeroController.instance;
@@ -21,7 +21,7 @@ namespace Snapshot_SilkSong.SceneState
             sceneState.position = heroData.transform.position;
         }
 
-        public static IEnumerator LoadSceneStateCoroutine(SceneState sceneState, String path)
+        public static IEnumerator LoadSceneStateCoroutine(SceneState sceneState)
         {
             GameManager gameData = GameManager.instance;
             HeroController heroData = HeroController.instance;

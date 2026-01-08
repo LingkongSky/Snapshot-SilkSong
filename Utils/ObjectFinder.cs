@@ -213,6 +213,42 @@ namespace Snapshot_SilkSong.Utils
             }
         }
 
-    }
+  
+        // 查找目标对象
+        public static GameObject FindGameObjectByPath(string sceneName, string path)
+        {
+            GameObject sourceObj = GameObject.Find(path);
+            if (sourceObj == null)
+            {
+                sourceObj = FindGameObjectInHierarchy(path);
+            }
 
+            return sourceObj;
+        }
+
+        private static GameObject FindGameObjectInHierarchy(string path)
+        {
+            string[] pathParts = path.Split('/');
+            GameObject current = null;
+
+            foreach (string part in pathParts)
+            {
+                if (string.IsNullOrEmpty(part)) continue;
+
+                if (current == null)
+                {
+                    current = GameObject.Find(part);
+                }
+                else
+                {
+                    Transform child = current.transform.Find(part);
+                    current = child != null ? child.gameObject : null;
+                }
+
+                if (current == null) break;
+            }
+
+            return current;
+        }
+    }
 }
